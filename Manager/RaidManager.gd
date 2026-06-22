@@ -70,6 +70,16 @@ func return_to_lobby() -> void:
 	get_tree().change_scene_to_file(LOBBY_SCENE)
 
 
+# Recarrega o GATE ATUAL (morreu = tenta de novo, sem perder o progresso da raid).
+func retry_gate() -> void:
+	if current_raid == "" or not raids.has(current_raid):
+		get_tree().reload_current_scene()
+		return
+	var list : Array = raids[current_raid]
+	current_gate = clampi(current_gate, 0, list.size() - 1)
+	get_tree().change_scene_to_file(list[current_gate])
+
+
 # Carrega uma arena solta sem entrar numa sequência (modo treino do menu).
 func play_single(scene_path: String) -> void:
 	current_raid = ""

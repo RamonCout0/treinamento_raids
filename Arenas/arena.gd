@@ -50,11 +50,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		RaidManager.return_to_lobby()
 	elif _done and event.is_action_pressed("ui_accept"):
-		# SÓ avança pra próximo gate em VITÓRIA. Derrota = volta ao lobby.
-		if _won and RaidManager.current_raid != "":
-			RaidManager.next_gate()
+		if not _won:
+			RaidManager.retry_gate()             # DERROTA → tenta o MESMO gate de novo
+		elif RaidManager.current_raid != "":
+			RaidManager.next_gate()              # VITÓRIA → próximo gate
 		else:
-			RaidManager.return_to_lobby()
+			RaidManager.return_to_lobby()        # vitória avulsa → lobby
 
 
 func _build_background() -> void:
@@ -128,11 +129,11 @@ func _on_win() -> void:
 	_done = true
 	_won  = true
 	var next := "próximo gate" if RaidManager.current_raid != "" else "lobby"
-	_result_label.text = "VITÓRIA!\n\nEnter — %s" % next
+	_result_label.text = "VITÓRIA!\n\nEnter — %s\nEsc — lobby" % next
 
 
 func _on_lose() -> void:
 	if _done: return
 	_done = true
 	_won  = false
-	_result_label.text = "DERROTA\n\nEnter — lobby (recomeça a raid)"
+	_result_label.text = "DERROTA\n\nEnter — tentar de novo (mesmo gate)\nEsc — lobby"

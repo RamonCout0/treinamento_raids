@@ -46,7 +46,8 @@ Shaders_Efeitos/perigo.gdshader
 **5 Raids × 3 gates** (Gate 1 → Gate 2 → BOSS), inspirado nas raids do Lost Ark.
 A cena principal é o **LOBBY** (`Lobby/lobby.tscn`) — único ponto de entrada do
 jogo: andar até um portal e apertar **C** entra na raid. Vencer um gate → carrega o
-próximo; após o boss final volta ao lobby. **Esc**, durante uma luta, volta ao lobby.
+próximo; após o boss final volta ao lobby. **Morreu?** Enter **tenta o mesmo gate de
+novo** (mantém o progresso da raid); **Esc** volta ao lobby (recomeça a raid).
 
 **Raid 1 — Silvanna (mágica/gelo/lâminas)**
 - Gate 1 · *Eira* — cristais em círculo + lanças + zona segura + portão nevasca
@@ -211,6 +212,10 @@ Selecione o chefe na arena e edite os grupos exportados:
   `stagger_interrupts_attacks` (quebra **corta o ataque atual** na hora; veja seção 7).
 - **Arena:** `arena_left/right/top/floor`, `hover_height`, `move_speed`
   (combine os limites com os de `Arenas/arena.gd` se mudar o tamanho).
+- **Movimentação:** `roam` (o chefe **vaga pelo mapa nas pausas entre ataques** em
+  vez de ficar parado no meio — ligado por padrão), `roam_speed` (velocidade do
+  passeio), `roam_x_margin` (folga das bordas), `roam_y_jitter` (variação de altura).
+  Desligue `roam` num chefe específico se quiser ele fixo.
 - Cada chefe tem seu grupo próprio (telegrafo, janelas de parry, dano, intervalos…).
 
 ### Ritmo Global (multiplicadores) — todos os chefes

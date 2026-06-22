@@ -61,6 +61,13 @@ extends CharacterBody2D
 @export var mechanic_guard_mult : float = 0.5     # multiplicador de dano recebido enquanto a proteção está ativa
 @export var mechanic_guard_time : float = 3.0     # duração (s) da proteção ao anunciar mecânica/fase
 
+# O boss vaga pelo mapa nas pausas entre ataques (em vez de ficar parado no meio).
+@export_group("Movimentação")
+@export var roam : bool = true            # vaga pelo mapa nas pausas entre ataques
+@export var roam_speed : float = 110.0    # velocidade do deslocamento de roam
+@export var roam_x_margin : float = 60.0  # folga das bordas no eixo X
+@export var roam_y_jitter : float = 28.0  # variação de altura ao redor do hover
+
 # --- ESTADO ---
 enum State { INTRO, FIGHT, STAGGERED, DEAD }
 var state : State = State.INTRO
@@ -236,7 +243,12 @@ func _stagger_gate(time: float, on_tick: Callable = Callable(), fail_wipe := tru
 func _after_attack(t: float) -> void:
 	_play_anim("idle")
 	await _check_stun()
-	await _sleep(t * recovery_mult)
+	var rec := t * recovery_mult
+	# Em vez de ficar parado na pausa, o boss vaga pelo mapa (se roam ligado).
+	if roam and _alive() and state == State.FIGHT:
+		await _roam_for(rec)
+	else:
+		await _sleep(rec)
 
 
 func _check_stun() -> void:
@@ -336,6 +348,30 @@ func _move_to(target: Vector2, speed: float) -> void:
 	var dt := get_physics_process_delta_time()
 	while _alive() and global_position.distance_to(target) > 2.0:
 		global_position = global_position.move_toward(target, speed * dt)
+		await get_tree().physics_frame
+
+
+# Um ponto aleatório de hover dentro da arena (pro roam).
+func _roam_target() -> Vector2:
+	var x := randf_range(arena_left + roam_x_margin, arena_right - roam_x_margin)
+	var y := _idle_pos().y + randf_range(-roam_y_jitter, roam_y_jitter)
+	return Vector2(x, clampf(y, arena_top + 20.0, arena_floor - 20.0))
+
+
+# Vaga pelo mapa por `duration` s (troca de destino ao chegar). Respeita a quebra
+# de stagger responsiva. Usado nas pausas entre ataques quando `roam` está ligado.
+func _roam_for(duration: float) -> void:
+	var target := _roam_target()
+	var dt := get_physics_process_delta_time()
+	var elapsed := 0.0
+	while elapsed < duration and _alive() and state == State.FIGHT:
+		if _stun_pending and not _stagger_immune and not is_immune:
+			await _do_stun()
+			return
+		global_position = global_position.move_toward(target, roam_speed * dt)
+		if global_position.distance_to(target) <= 3.0:
+			target = _roam_target()
+		elapsed += dt
 		await get_tree().physics_frame
 
 
