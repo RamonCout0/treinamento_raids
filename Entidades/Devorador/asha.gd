@@ -13,6 +13,16 @@ extends BossBase
 @export var pause             : float = 1.1
 @export var th_gate_pct       : float = 0.55
 
+@export_group("Asha: Tempos e velocidade")
+@export var fireball_speed : float = 240.0
+@export var homing_speed   : float = 150.0
+@export var jet_speed      : float = 220.0
+@export var trail_active   : float = 3.0
+@export var lava_telegraph : float = 0.7
+@export var lava_active    : float = 2.5
+@export var lava_duration  : float = 3.3
+@export var gate_time      : float = 10.0
+
 @export_group("Asha: Skins (opcional)")
 @export var skin_trilha : PackedScene
 @export var skin_bola   : PackedScene
@@ -48,7 +58,7 @@ func _atk_fireballs() -> void:
 	for k in 3:
 		if not _player_alive(): break
 		var dir := (_player.global_position - global_position).normalized()
-		_spawn_projectile(PROJECTILE.Mode.STRAIGHT, global_position, dir, 240.0,
+		_spawn_projectile(PROJECTILE.Mode.STRAIGHT, global_position, dir, fireball_speed,
 			fireball_damage, true, skin_bola, Vector2(18, 18), Color(1.0, 0.5, 0.1))
 		await _sleep(0.4)
 	await _sleep(0.4)
@@ -57,7 +67,7 @@ func _atk_fireballs() -> void:
 func _atk_homing_fireballs() -> void:
 	_play_anim("attack")
 	for k in 2:
-		_spawn_projectile(PROJECTILE.Mode.HOMING, global_position, Vector2.UP, 150.0,
+		_spawn_projectile(PROJECTILE.Mode.HOMING, global_position, Vector2.UP, homing_speed,
 			fireball_damage, true, skin_bola, Vector2(20, 20), Color(1.0, 0.4, 0.2))
 		await _sleep(0.45)
 	await _sleep(0.6)
@@ -73,7 +83,7 @@ func _atk_trail() -> void:
 			else (arena_right - step) - step * float(k)
 		await _move_to(Vector2(cx, arena_floor - 22.0), move_speed * 1.2)
 		_spawn_hazard(Vector2(cx, arena_floor - 8.0), Vector2(step + 6.0, 14.0),
-			Color(1.0, 0.45, 0.05), trail_tick_damage, 0.3, 3.0, 0.5,
+			Color(1.0, 0.45, 0.05), trail_tick_damage, 0.3, trail_active, 0.5,
 			true, false, skin_trilha)
 
 
@@ -83,8 +93,8 @@ func _atk_mini_lava() -> void:
 	await _move_to(Vector2(_arena_center().x, arena_top + 30.0), move_speed)
 	_spawn_hazard(Vector2(_arena_center().x, arena_floor - 6.0),
 		Vector2(arena_right - arena_left, 26.0), Color(1.0, 0.35, 0.05),
-		minilava_damage, 0.7, 2.5, 0.5, true, false, skin_lava)
-	await _sleep(3.3)
+		minilava_damage, lava_telegraph, lava_active, 0.5, true, false, skin_lava)
+	await _sleep(lava_duration)
 
 
 # Portão: jato de fogo girando da Asha — fique fora da linha, encha o stagger.
@@ -101,8 +111,8 @@ func _gate_jet() -> void:
 			# 2 projéteis na direção atual, opostos
 			for s in [1.0, -1.0]:
 				_spawn_projectile(PROJECTILE.Mode.STRAIGHT, _arena_center(),
-					Vector2.RIGHT.rotated(angle + (PI if s < 0.0 else 0.0)), 220.0,
+					Vector2.RIGHT.rotated(angle + (PI if s < 0.0 else 0.0)), jet_speed,
 					fireball_damage * 0.7, false, skin_bola, Vector2(16, 16),
 					Color(1.0, 0.5, 0.1))
-	var ok := await _stagger_gate(10.0, on_tick, false)
+	var ok := await _stagger_gate(gate_time, on_tick, false)
 	if ok: _announce("Jato apagado!", Color(0.5, 1.0, 0.8))

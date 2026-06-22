@@ -151,6 +151,12 @@ func _handle_wall_grab() -> void:
 			velocity.y = min(velocity.y, WALL_SLIDE_SPEED)
 
 
+## True quando o player está com i-frames (atualmente: durante o dash).
+## Os bosses/perigos checam isto pra saber se o golpe deve ser ignorado.
+func is_invincible() -> bool:
+	return is_dashing
+
+
 func _handle_dash() -> void:
 	if Input.is_action_just_pressed("dash") and can_dash and not is_dashing:
 		_dash()
@@ -293,7 +299,11 @@ func take_damage(amount: float) -> void:
 func _die() -> void:
 	EventBus.player_died.emit()
 	set_physics_process(false)
-	visual.color = Color(0.3, 0.3, 0.3)
+	# Visual pode ser ColorRect (placeholder, usa .color) ou AnimatedSprite2D (.modulate).
+	if visual is ColorRect:
+		visual.color = Color(0.3, 0.3, 0.3)
+	else:
+		visual.modulate = Color(0.3, 0.3, 0.3)
 
 
 # --- VISUAL ---

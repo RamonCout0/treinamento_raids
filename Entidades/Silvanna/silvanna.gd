@@ -110,7 +110,7 @@ func _atk_pendulo() -> void:
 		var y := lerpf(start.y, peak, pow(sin(tt * PI), 0.6))
 		global_position = Vector2(clampf(x, arena_left, arena_right), clampf(y, arena_top, arena_floor))
 		dmg_cd -= dt
-		if _player_alive() and global_position.distance_to(_player.global_position) < pendulo_range and dmg_cd <= 0.0 and not _player.get("is_dashing"):
+		if _player_alive() and global_position.distance_to(_player.global_position) < pendulo_range and dmg_cd <= 0.0 and not _player_invincible():
 			_player.take_damage(pendulo_damage); dmg_cd = 0.3
 		await get_tree().physics_frame
 	_play_anim("idle")
@@ -132,7 +132,7 @@ func _atk_varredura() -> void:
 	while _alive():
 		x += dir * laser_speed * dt
 		beam.global_position.x = x
-		if _player_alive() and absf(_player.global_position.x - x) < 10.0 and not _player.get("is_dashing"):
+		if _player_alive() and absf(_player.global_position.x - x) < 10.0 and not _player_invincible():
 			_player.take_damage(laser_damage)
 		if x <= arena_left + 8.0 or x >= arena_right - 8.0:
 			break

@@ -186,7 +186,7 @@ func _atk_investida() -> void:
 	while _alive():
 		global_position.x += dir * spd * dt
 		if not hit and _player_alive() and absf(_player.global_position.x - global_position.x) < 28.0 \
-				and absf(_player.global_position.y - y) < 30.0 and not _player.get("is_dashing"):
+				and absf(_player.global_position.y - y) < 30.0 and not _player_invincible():
 			_player.take_damage(charge_damage); hit = true
 		if global_position.x <= arena_left + 16.0 or global_position.x >= arena_right - 16.0:
 			break

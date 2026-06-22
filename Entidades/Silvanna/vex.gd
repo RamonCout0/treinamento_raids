@@ -14,6 +14,16 @@ extends BossBase
 @export var pause        : float = 1.0
 @export var th_gate_pct : float = 0.50
 
+@export_group("Vex: Tempos e velocidade")
+@export var blade_speed      : float = 360.0
+@export var slash_telegraph  : float = 0.75
+@export var slash_active     : float = 0.25
+@export var cross_telegraph  : float = 0.8
+@export var cross_active     : float = 0.3
+@export var rain_telegraph   : float = 0.9
+@export var rain_active      : float = 0.4
+@export var gate_time        : float = 11.0
+
 @export_group("Vex: Skins (opcional)")
 @export var skin_corte : PackedScene
 @export var skin_lamina : PackedScene
@@ -47,7 +57,7 @@ func _atk_slash() -> void:
 	_play_anim("attack")
 	var y := randf_range(arena_top + 30.0, arena_floor - 12.0)
 	_spawn_hazard(Vector2(_arena_center().x, y), Vector2(arena_right - arena_left, 10.0),
-		Color(0.9, 0.9, 1.0), slash_damage, 0.75, 0.25, 0.0, true, false, skin_corte)
+		Color(0.9, 0.9, 1.0), slash_damage, slash_telegraph, slash_active, 0.0, true, false, skin_corte)
 	await _sleep(1.2)
 
 
@@ -57,7 +67,7 @@ func _atk_bounce_blades() -> void:
 	for k in 3:
 		var ang := base + deg_to_rad(40.0 * (float(k) - 1.0))
 		_spawn_projectile(PROJECTILE.Mode.BOUNCE, global_position, Vector2.RIGHT.rotated(ang),
-			360.0, blade_damage, true, skin_lamina, Vector2(14, 4), Color(0.85, 0.9, 1.0))
+			blade_speed, blade_damage, true, skin_lamina, Vector2(14, 4), Color(0.85, 0.9, 1.0))
 	await _sleep(0.6)
 
 
@@ -68,9 +78,9 @@ func _atk_cross() -> void:
 	var c := _arena_center()
 	# linha horizontal + vertical
 	_spawn_hazard(c, Vector2(arena_right - arena_left, 12.0), Color(0.9, 0.95, 1.0),
-		slash_damage, 0.8, 0.3, 0.0, true, false, skin_corte)
+		slash_damage, cross_telegraph, cross_active, 0.0, true, false, skin_corte)
 	_spawn_hazard(c, Vector2(12.0, arena_floor - arena_top), Color(0.9, 0.95, 1.0),
-		slash_damage, 0.8, 0.3, 0.0, true, false, skin_corte)
+		slash_damage, cross_telegraph, cross_active, 0.0, true, false, skin_corte)
 	await _sleep(1.3)
 
 
@@ -88,7 +98,7 @@ func _atk_rain() -> void:
 		if gaps.has(c): continue
 		var cx : float = arena_left + step * 0.5 + c * step
 		_spawn_hazard(Vector2(cx, _arena_center().y), Vector2(24.0, arena_floor - arena_top),
-			Color(0.85, 0.9, 1.0), rain_damage, 0.9, 0.4, 0.0, true, false, skin_lamina)
+			Color(0.85, 0.9, 1.0), rain_damage, rain_telegraph, rain_active, 0.0, true, false, skin_lamina)
 	await _sleep(1.5)
 
 
@@ -107,5 +117,5 @@ func _gate_rain() -> void:
 				var cx : float = arena_left + step * 0.5 + c * step
 				_spawn_hazard(Vector2(cx, _arena_center().y), Vector2(28.0, arena_floor - arena_top),
 					Color(0.85, 0.9, 1.0), rain_damage * 0.7, 0.8, 0.35, 0.0, true, false, skin_lamina)
-	var ok := await _stagger_gate(11.0, on_tick, false)
+	var ok := await _stagger_gate(gate_time, on_tick, false)
 	if ok: _announce("Chuva quebrada!", Color(0.5, 1.0, 0.8))

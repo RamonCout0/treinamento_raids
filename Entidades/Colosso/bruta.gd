@@ -13,6 +13,14 @@ extends BossBase
 @export var pause          : float = 1.3
 @export var th_gate_pct    : float = 0.55
 
+@export_group("Bruta: Tempos e velocidade")
+@export var stake_telegraph : float = 0.7
+@export var stake_active    : float = 0.3
+@export var wave_telegraph  : float = 0.4
+@export var wave_step       : float = 0.07
+@export var wave_active     : float = 0.22
+@export var gate_time       : float = 10.0
+
 @export_group("Bruta: Skins (opcional)")
 @export var skin_estaca : PackedScene
 @export var skin_onda   : PackedScene
@@ -51,7 +59,7 @@ func _atk_stake() -> void:
 	_play_anim("slam")
 	var px : float = _player.global_position.x if _player_alive() else _arena_center().x
 	_spawn_circle(Vector2(px, arena_floor - 12.0), 30.0, Color(0.7, 0.55, 0.4),
-		stake_damage, 0.7, 0.3, true, false, skin_estaca)
+		stake_damage, stake_telegraph, stake_active, true, false, skin_estaca)
 	await _sleep(1.1)
 
 
@@ -66,8 +74,8 @@ func _atk_wave() -> void:
 	for k in n:
 		var x : float = start_x + dir * step * float(k)
 		_spawn_hazard(Vector2(x, arena_floor - 10.0), Vector2(38.0, 16.0),
-			Color(0.85, 0.6, 0.25), wave_damage, 0.4 + 0.07 * k, 0.22, 0.0, true, false, skin_onda)
-	await _sleep(0.4 + 0.07 * n + 0.4)
+			Color(0.85, 0.6, 0.25), wave_damage, wave_telegraph + wave_step * k, wave_active, 0.0, true, false, skin_onda)
+	await _sleep(wave_telegraph + wave_step * n + 0.4)
 
 
 # Duas estacas seguidas (uma na sua posição, outra próxima — força movimento).
@@ -93,5 +101,5 @@ func _gate_double_wave() -> void:
 				_spawn_hazard(Vector2(arena_right - 30.0 - step * k, arena_floor - 10.0),
 					Vector2(38.0, 16.0), Color(0.85, 0.6, 0.25),
 					wave_damage * 0.7, 0.5 + 0.06 * k, 0.22, 0.0, true, false, skin_onda)
-	var ok := await _stagger_gate(10.0, on_tick, false)
+	var ok := await _stagger_gate(gate_time, on_tick, false)
 	if ok: _announce("Ondas quebradas!", Color(0.5, 1.0, 0.8))

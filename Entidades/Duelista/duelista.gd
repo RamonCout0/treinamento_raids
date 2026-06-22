@@ -110,7 +110,7 @@ func _unblockable_strike() -> void:
 	var t := 0.0
 	var safe := false
 	while _alive() and t < 0.2:
-		if _player_alive() and _player.get("is_dashing"):
+		if _player_invincible():
 			safe = true; break
 		t += dt
 		await get_tree().physics_frame

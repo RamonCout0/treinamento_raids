@@ -124,9 +124,6 @@ func _build_portals() -> void:
 		core.size = Vector2(PORTAL_W, PORTAL_H)
 		core.color = p["color"]
 		add_child(core)
-		# Animação simples: brilho pulsante via _process? Mais simples: AnimationPlayer
-		var blink := AnimationPlayer.new()
-		add_child(blink)
 		# Nome curto embaixo
 		var lbl := Label.new()
 		lbl.text = p["id"].to_upper()

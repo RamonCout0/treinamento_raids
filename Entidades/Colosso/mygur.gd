@@ -59,7 +59,7 @@ func _atk_short_charge() -> void:
 	while _alive() and ((dir > 0 and global_position.x < end_x) or (dir < 0 and global_position.x > end_x)):
 		global_position.x += dir * charge_speed * dt
 		if not hit and _player_alive() and absf(_player.global_position.x - global_position.x) < 28.0 \
-				and absf(_player.global_position.y - y) < 30.0 and not _player.get("is_dashing"):
+				and absf(_player.global_position.y - y) < 30.0 and not _player_invincible():
 			_player.take_damage(charge_damage); hit = true
 		await get_tree().physics_frame
 
@@ -113,6 +113,6 @@ func _charge_pass() -> void:
 		t += dt
 		global_position.x += dir * charge_speed * 0.9 * dt
 		if _player_alive() and absf(_player.global_position.x - global_position.x) < 26.0 \
-				and absf(_player.global_position.y - y) < 30.0 and not _player.get("is_dashing"):
+				and absf(_player.global_position.y - y) < 30.0 and not _player_invincible():
 			_player.take_damage(charge_damage * 0.7)
 		await get_tree().physics_frame

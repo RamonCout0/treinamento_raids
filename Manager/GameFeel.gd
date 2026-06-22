@@ -20,6 +20,9 @@ var _shake_intensity := 0.0
 var _shake_time      := 0.0
 var _shake_max_time  := 0.0
 
+# Token do hit_stop mais recente: dois freezes sobrepostos não cortam um ao outro.
+var _hitstop_token   := 0
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS   # não pausa com time_scale
@@ -40,10 +43,14 @@ func _process(delta: float) -> void:
 # Freeze frames. Engine.time_scale despenca por `t` segundos reais.
 # Pequeno (~0.05): hit normal. Maior (~0.12): parry/stagger.
 func hit_stop(t: float = 0.06, scale: float = 0.02) -> void:
+	_hitstop_token += 1
+	var my_token := _hitstop_token
 	Engine.time_scale = scale
 	# Timer "real" — ignora time_scale.
 	await get_tree().create_timer(t, true, false, true).timeout
-	Engine.time_scale = 1.0
+	# Só restaura se nenhum hit_stop mais novo assumiu nesse meio tempo.
+	if my_token == _hitstop_token:
+		Engine.time_scale = 1.0
 
 
 # Camera shake. Acumula com triggers anteriores (max).

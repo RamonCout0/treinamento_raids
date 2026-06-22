@@ -12,6 +12,15 @@ extends BossBase
 @export var pause          : float = 1.1
 @export var th_gate_pct : float = 0.55
 
+@export_group("Eira: Tempos e velocidade")
+@export var lance_speed      : float = 280.0
+@export var crystal_telegraph : float = 0.7
+@export var crystal_active   : float = 0.3
+@export var safe_telegraph   : float = 1.3
+@export var safe_active      : float = 0.5
+@export var safe_duration    : float = 2.0
+@export var gate_time        : float = 10.0
+
 @export_group("Eira: Skins (opcional)")
 @export var skin_cristal : PackedScene
 @export var skin_lanca   : PackedScene
@@ -49,7 +58,7 @@ func _atk_crystals(n: int) -> void:
 		var px := randf_range(arena_left + 24.0, arena_right - 24.0)
 		var py := randf_range(arena_top + 40.0, arena_floor - 16.0)
 		_spawn_circle(Vector2(px, py), 24.0, Color(0.6, 0.9, 1.0),
-			crystal_damage, 0.7, 0.3, true, false, skin_cristal)
+			crystal_damage, crystal_telegraph, crystal_active, true, false, skin_cristal)
 		await _sleep(0.28)
 	await _sleep(0.5)
 
@@ -59,7 +68,7 @@ func _atk_lances() -> void:
 	for k in 3:
 		if not _player_alive(): break
 		var dir := (_player.global_position - global_position).normalized()
-		_spawn_projectile(PROJECTILE.Mode.STRAIGHT, global_position, dir, 280.0,
+		_spawn_projectile(PROJECTILE.Mode.STRAIGHT, global_position, dir, lance_speed,
 			lance_damage, false, skin_lanca, Vector2(18, 5), Color(0.55, 0.85, 1.0))
 		await _sleep(0.35)
 	await _sleep(0.5)
@@ -69,8 +78,8 @@ func _atk_safe_center() -> void:
 	_announce("Fique no círculo verde!", Color(0.4, 1.0, 0.5))
 	_play_anim("cast")
 	_spawn_safezone(_arena_center(), 48.0, Color(0.3, 1.0, 0.4),
-		crystal_damage * 1.2, 1.3, 0.5)
-	await _sleep(2.0)
+		crystal_damage * 1.2, safe_telegraph, safe_active)
+	await _sleep(safe_duration)
 
 
 # Portão: nevasca curta, encha o stagger ou pequeno dano contínuo
@@ -84,5 +93,5 @@ func _gate_blizzard() -> void:
 			var px := randf_range(arena_left + 24.0, arena_right - 24.0)
 			_spawn_circle(Vector2(px, arena_floor - 16.0), 20.0,
 				Color(0.55, 0.85, 1.0), crystal_damage * 0.6, 0.4, 0.25)
-	var ok := await _stagger_gate(10.0, on_tick, false)
+	var ok := await _stagger_gate(gate_time, on_tick, false)
 	if ok: _announce("Nevasca dissipada!", Color(0.5, 1.0, 0.8))

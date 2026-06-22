@@ -44,6 +44,12 @@ extends CharacterBody2D
 @export var stagger_stun_time : float = 4.0
 @export var stagger_stun_dmg_mult : float = 2.0
 
+@export_group("Ritmo Global (multiplicadores)")
+@export var telegraph_mult : float = 1.0          # escala o aviso (telegrafo)
+@export var active_mult : float = 1.0             # escala o tempo de dano
+@export var projectile_speed_mult : float = 1.0   # escala a velocidade dos projéteis
+@export var recovery_mult : float = 1.0           # escala as pausas entre ataques
+
 # --- ESTADO ---
 enum State { INTRO, FIGHT, STAGGERED, DEAD }
 var state : State = State.INTRO
@@ -68,13 +74,13 @@ var _player    : CharacterBody2D = null
 
 const HAZARD     := preload("res://Entidades/Comum/hazard.gd")
 const PROJECTILE := preload("res://Entidades/Comum/projectile.gd")
+const WIPE_DAMAGE := 1.0e9
 
 
 # =============================================================================
 # INIT
 # =============================================================================
 func _ready() -> void:
-	randomize()
 	add_to_group("boss")
 	# Camadas: 1=player, 2=arena, 3=boss(4), 4=hurtbox(8).
 	collision_layer = 4
@@ -210,7 +216,7 @@ func _stagger_gate(time: float, on_tick: Callable = Callable(), fail_wipe := tru
 func _after_attack(t: float) -> void:
 	_play_anim("idle")
 	await _check_stun()
-	await _sleep(t)
+	await _sleep(t * recovery_mult)
 
 
 func _check_stun() -> void:
@@ -255,7 +261,7 @@ func _die() -> void:
 
 func _wipe() -> void:
 	if _player and is_instance_valid(_player):
-		_player.take_damage(999999.0)
+		_player.take_damage(WIPE_DAMAGE)
 
 
 func _parry_feedback() -> void:
@@ -311,7 +317,7 @@ func _spawn_hazard(pos: Vector2, size: Vector2, color: Color, damage: float,
 		telegraph: float, active: float, tick: float = 0.0,
 		respect_dash: bool = true, instakill: bool = false, skin: PackedScene = null) -> Node:
 	var h = HAZARD.new()
-	h.setup(size, color, damage, telegraph, active, tick, respect_dash, instakill, skin)
+	h.setup(size, color, damage, telegraph * telegraph_mult, active * active_mult, tick, respect_dash, instakill, skin)
 	get_parent().add_child(h)
 	h.global_position = pos
 	return h
@@ -322,7 +328,7 @@ func _spawn_circle(pos: Vector2, radius: float, color: Color, damage: float,
 		telegraph: float, active: float, respect_dash: bool = true,
 		instakill: bool = false, skin: PackedScene = null) -> Node:
 	var h = HAZARD.new()
-	h.setup(Vector2(radius * 2.0, radius * 2.0), color, damage, telegraph, active,
+	h.setup(Vector2(radius * 2.0, radius * 2.0), color, damage, telegraph * telegraph_mult, active * active_mult,
 		0.0, respect_dash, instakill, skin, 1, false)
 	get_parent().add_child(h)
 	h.global_position = pos
@@ -334,8 +340,8 @@ func _spawn_circle(pos: Vector2, radius: float, color: Color, damage: float,
 func _spawn_safezone(center: Vector2, safe_radius: float, color: Color, damage: float,
 		telegraph: float, active: float) -> Node:
 	var h = HAZARD.new()
-	h.setup(Vector2(safe_radius * 2.0, safe_radius * 2.0), color, damage, telegraph,
-		active, 0.0, false, false, null, 1, true)
+	h.setup(Vector2(safe_radius * 2.0, safe_radius * 2.0), color, damage, telegraph * telegraph_mult,
+		active * active_mult, 0.0, false, false, null, 1, true)
 	get_parent().add_child(h)
 	h.global_position = center
 	return h
@@ -346,7 +352,7 @@ func _spawn_projectile(mode: int, pos: Vector2, dir: Vector2, speed: float,
 		damage: float, counterable: bool = false, skin: PackedScene = null,
 		size: Vector2 = Vector2(12, 6), color: Color = Color(0.95, 0.9, 0.5)) -> Node:
 	var p = PROJECTILE.new()
-	p.setup(mode, dir, speed, damage, _arena_rect(), counterable, skin, size, color)
+	p.setup(mode, dir, speed * projectile_speed_mult, damage, _arena_rect(), counterable, skin, size, color)
 	get_parent().add_child(p)
 	p.global_position = pos
 	return p
@@ -389,6 +395,10 @@ func _player_x() -> float:
 
 func _player_alive() -> bool:
 	return _player != null and is_instance_valid(_player)
+
+
+func _player_invincible() -> bool:
+	return _player_alive() and _player.is_invincible()
 
 
 # --- formas / cor ---

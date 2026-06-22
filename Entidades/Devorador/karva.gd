@@ -88,7 +88,7 @@ func _atk_dive() -> void:
 		global_position.y += dive_speed * dt
 		if not hit and _player_alive() \
 				and global_position.distance_to(_player.global_position) < 24.0 \
-				and not _player.get("is_dashing"):
+				and not _player_invincible():
 			_player.take_damage(dive_damage); hit = true
 		await get_tree().physics_frame
 	await _sleep(0.4)   # janela de DPS no chão

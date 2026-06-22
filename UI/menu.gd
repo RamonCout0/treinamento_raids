@@ -133,22 +133,6 @@ func _make_boss_cell(i: int) -> void:
 	add_child(btn)
 
 
-func _make_logo_cell(col: int, row: int) -> void:
-	var p := _cell_pos(col, row)
-	var frame := ColorRect.new()
-	frame.position = p
-	frame.size = Vector2(CW, CH)
-	frame.color = Color(0.10, 0.10, 0.16)
-	add_child(frame)
-	var lbl := Label.new()
-	lbl.text = "RAIDO"
-	lbl.position = p
-	lbl.size = Vector2(CW, CH)
-	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	add_child(lbl)
-
-
 func _add_label(text: String, x: float, y: float, w: float, h: float, align: int) -> Label:
 	var l := Label.new()
 	l.text = text

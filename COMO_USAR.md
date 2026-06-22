@@ -3,7 +3,8 @@
 Projeto focado em **mecânica de boss**. Tudo é **placeholder** (cubos coloridos +
 shader de brilho) feito pra ser **trocado pela sua arte** sem mexer na lógica.
 
-> Engine: **Godot 4.6**. Cena principal: `res://UI/menu.tscn`.
+> Engine: **Godot 4.6**. Cena principal (`run/main_scene` em `project.godot`):
+> `res://Lobby/lobby.tscn`.
 
 ---
 
@@ -209,6 +210,40 @@ Selecione o chefe na arena e edite os grupos exportados:
 - **Arena:** `arena_left/right/top/floor`, `hover_height`, `move_speed`
   (combine os limites com os de `Arenas/arena.gd` se mudar o tamanho).
 - Cada chefe tem seu grupo próprio (telegrafo, janelas de parry, dano, intervalos…).
+
+### Ritmo Global (multiplicadores) — todos os chefes
+
+Todo chefe herda da `BossBase` o grupo **"Ritmo Global (multiplicadores)"**: quatro
+multiplicadores que escalam o "feel" da luta inteira sem mexer ataque por ataque.
+O default de todos é **1.0** (não muda nada). Diminua para deixar mais lento/fácil,
+aumente para acelerar/endurecer:
+- `telegraph_mult` — escala o tempo de **aviso** (telegrafo) de TODO perigo/círculo/
+  zona segura. >1.0 = mais tempo pra reagir; <1.0 = avisos mais curtos (mais difícil).
+- `active_mult` — escala o tempo em que o perigo fica **dando dano** (janela ativa).
+- `projectile_speed_mult` — escala a **velocidade de todos os projéteis** do chefe.
+- `recovery_mult` — escala as **pausas entre ataques** (o `_after_attack`). >1.0 dá
+  mais respiro entre golpes.
+
+### Tempos e velocidade — por chefe (gates)
+
+Os 6 chefes de gate (Eira, Vex, Hana, Bruta, Lira, Asha) têm um grupo
+**"Tempos e velocidade"** (ou "Velocidade dos shurikens", na Hana) que expõe os
+tempos/velocidades antes fixos no código. Os defaults reproduzem o comportamento
+atual — mude só se quiser rebalancear aquele ataque específico:
+- **Eira:** `lance_speed` (lanças), `crystal_telegraph`/`crystal_active` (cristais),
+  `safe_telegraph`/`safe_active`/`safe_duration` (zona segura central), `gate_time`.
+- **Vex:** `blade_speed` (lâminas), `slash_telegraph`/`slash_active` (corte),
+  `cross_telegraph`/`cross_active` (corte em X), `rain_telegraph`/`rain_active`
+  (chuva), `gate_time`.
+- **Hana:** `cross_speed`, `fan_speed`, `circle_speed`, `homing_speed`, `rain_speed`
+  (velocidade dos shurikens em cada padrão), `gate_time`.
+- **Bruta:** `stake_telegraph`/`stake_active` (estaca), `wave_telegraph`/`wave_step`/
+  `wave_active` (onda — `wave_step` é o atraso somado por segmento), `gate_time`.
+- **Lira:** `x_speed` (padrão X), `line_telegraph`/`line_late`/`cross_telegraph`/
+  `line_active` (tempos das linhas/cruz/quadrantes), `gate_time`.
+- **Asha:** `fireball_speed`, `homing_speed`, `jet_speed` (velocidades de fogo),
+  `trail_active` (duração da trilha), `lava_telegraph`/`lava_active`/`lava_duration`
+  (mini-lava), `gate_time`.
 
 Dano/stagger do player ficam em `Player/player.gd` (`COMBO_DMG`, `COMBO_STAGGER`,
 `HEAVY_DMG`, `HEAVY_STAGGER`, `PARRY_WINDOW`).

@@ -11,6 +11,14 @@ extends BossBase
 @export var th_gate_pct : float = 0.55
 @export var pause : float = 1.0
 
+@export_group("Hana: Velocidade dos shurikens")
+@export var cross_speed  : float = 280.0
+@export var fan_speed    : float = 300.0
+@export var circle_speed : float = 250.0
+@export var homing_speed : float = 200.0
+@export var rain_speed   : float = 240.0
+@export var gate_time    : float = 10.0
+
 @export_group("Hana: Skins (opcional)")
 @export var skin_shuriken : PackedScene
 
@@ -43,7 +51,7 @@ func _pattern_cross() -> void:
 	_play_anim("throw")
 	for ang in [0.0, PI * 0.5, PI, PI * 1.5]:
 		_spawn_projectile(PROJECTILE.Mode.STRAIGHT, global_position,
-			Vector2.RIGHT.rotated(ang), 280.0, shuriken_damage, true,
+			Vector2.RIGHT.rotated(ang), cross_speed, shuriken_damage, true,
 			skin_shuriken, Vector2(12, 12), Color(0.95, 0.8, 0.4))
 	await _sleep(0.6)
 
@@ -55,7 +63,7 @@ func _pattern_fan() -> void:
 	for k in 5:
 		var ang := base + deg_to_rad(20.0 * (float(k) - 2.0))
 		_spawn_projectile(PROJECTILE.Mode.STRAIGHT, global_position,
-			Vector2.RIGHT.rotated(ang), 300.0, shuriken_damage, true,
+			Vector2.RIGHT.rotated(ang), fan_speed, shuriken_damage, true,
 			skin_shuriken, Vector2(12, 12), Color(0.95, 0.8, 0.4))
 	await _sleep(0.55)
 
@@ -66,7 +74,7 @@ func _pattern_circle() -> void:
 	for k in 8:
 		var ang := TAU * (float(k) / 8.0)
 		_spawn_projectile(PROJECTILE.Mode.STRAIGHT, global_position,
-			Vector2.RIGHT.rotated(ang), 250.0, shuriken_damage, true,
+			Vector2.RIGHT.rotated(ang), circle_speed, shuriken_damage, true,
 			skin_shuriken, Vector2(12, 12), Color(0.95, 0.8, 0.4))
 	await _sleep(0.7)
 
@@ -75,7 +83,7 @@ func _pattern_circle() -> void:
 func _pattern_homing() -> void:
 	_play_anim("throw")
 	for k in 2:
-		_spawn_projectile(PROJECTILE.Mode.HOMING, global_position, Vector2.UP, 200.0,
+		_spawn_projectile(PROJECTILE.Mode.HOMING, global_position, Vector2.UP, homing_speed,
 			shuriken_damage, true, skin_shuriken, Vector2(14, 14), Color(1.0, 0.5, 0.3))
 		await _sleep(0.4)
 	await _sleep(0.8)
@@ -93,8 +101,8 @@ func _gate_rain() -> void:
 			for k in 4:
 				var px := randf_range(arena_left + 20.0, arena_right - 20.0)
 				_spawn_projectile(PROJECTILE.Mode.STRAIGHT,
-					Vector2(px, arena_top + 10.0), Vector2.DOWN, 240.0,
+					Vector2(px, arena_top + 10.0), Vector2.DOWN, rain_speed,
 					shuriken_damage * 0.7, true, skin_shuriken,
 					Vector2(12, 12), Color(0.95, 0.8, 0.4))
-	var ok := await _stagger_gate(10.0, on_tick, false)
+	var ok := await _stagger_gate(gate_time, on_tick, false)
 	if ok: _announce("Chuva quebrada!", Color(0.5, 1.0, 0.8))

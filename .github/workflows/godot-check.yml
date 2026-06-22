@@ -1,0 +1,42 @@
+name: Godot Check
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  import:
+    name: Importar projeto (Godot 4.6 headless)
+    runs-on: ubuntu-latest
+    env:
+      GODOT_VERSION: "4.6-stable"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Baixar Godot 4.6 headless
+        run: |
+          set -euo pipefail
+          ZIP="Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          URL="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/${ZIP}"
+          echo "Baixando $URL"
+          curl -fL -o godot.zip "$URL"
+          unzip -o godot.zip
+          mv "Godot_v${GODOT_VERSION}_linux.x86_64" godot
+          chmod +x godot
+
+      - name: Importar (gera log)
+        run: |
+          set -uo pipefail
+          # --import compila todos os scripts; capturamos stdout+stderr.
+          ./godot --headless --path . --import 2>&1 | tee import.log
+
+      - name: Falhar se houver erro de script
+        run: |
+          set -uo pipefail
+          if grep -E "SCRIPT ERROR|Parse Error|Compile Error|Failed to load script" import.log; then
+            echo "::error::Erro de script detectado no import do Godot."
+            exit 1
+          fi
+          echo "Nenhum erro de script encontrado."

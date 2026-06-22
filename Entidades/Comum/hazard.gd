@@ -28,6 +28,7 @@ var _shape       : int     = 0       # 0 = retângulo, 1 = círculo
 var _inverse     : bool    = false   # true = dano FORA da forma (zona segura)
 
 const PERIGO_SHADER := preload("res://Shaders_Efeitos/perigo.gdshader")
+const INSTAKILL_DAMAGE := 1.0e9
 
 var _vis      : CanvasItem = null
 var _is_rect  : bool  = true
@@ -149,10 +150,10 @@ func _try_damage() -> void:
 	if not hit:
 		return
 
-	if _respect_dash and _player.get("is_dashing"):
+	if _respect_dash and _player.has_method("is_invincible") and _player.is_invincible():
 		return
 	if _instakill:
-		_player.take_damage(999999.0)
+		_player.take_damage(INSTAKILL_DAMAGE)
 		return
 	if _tick <= 0.0:
 		if not _hit_once:
