@@ -43,12 +43,23 @@ extends CharacterBody2D
 @export var stagger_decay : float = 250.0
 @export var stagger_stun_time : float = 4.0
 @export var stagger_stun_dmg_mult : float = 2.0
+## Quebra de postura corta o ataque em andamento (responsivo, estilo Lost Ark).
+## Desligue pra voltar ao comportamento antigo (só quebra entre ataques).
+@export var stagger_interrupts_attacks : bool = true
 
 @export_group("Ritmo Global (multiplicadores)")
+@export var hp_mult : float = 5.0                  # escala a VIDA total (botão de duração da luta)
 @export var telegraph_mult : float = 1.0          # escala o aviso (telegrafo)
 @export var active_mult : float = 1.0             # escala o tempo de dano
 @export var projectile_speed_mult : float = 1.0   # escala a velocidade dos projéteis
-@export var recovery_mult : float = 1.0           # escala as pausas entre ataques
+@export var recovery_mult : float = 1.25          # escala as pausas entre ataques (menos corrido)
+
+# Janela de "preparação": durante mecânicas/troca de fase o boss recebe MENOS dano,
+# pra o player ter tempo de ler e se posicionar (estilo Lost Ark). Disparada
+# automaticamente por _announce / _phase_card / _gate_card / _wipe_card.
+@export_group("Proteção em Mecânicas")
+@export var mechanic_guard_mult : float = 0.5     # multiplicador de dano recebido enquanto a proteção está ativa
+@export var mechanic_guard_time : float = 3.0     # duração (s) da proteção ao anunciar mecânica/fase
 
 # --- ESTADO ---
 enum State { INTRO, FIGHT, STAGGERED, DEAD }
@@ -60,6 +71,8 @@ var is_immune  : bool  = false
 var _counter_flag := false
 var _stun_pending := false
 var _flashing     := false
+var _guard_t      := 0.0     # tempo restante da proteção de mecânica/fase
+var _stagger_immune := false # mecânica imune a stagger: barra não enche nem quebra
 
 # --- FORMAS (placeholder cubo trocável por AnimatedSprite2D) ---
 # Adicione filhos AnimatedSprite2D; eles são registrados pelo NOME do nó.
@@ -81,6 +94,7 @@ const WIPE_DAMAGE := 1.0e9
 # INIT
 # =============================================================================
 func _ready() -> void:
+	max_hp *= hp_mult   # escala a vida total (duração da luta) antes de tudo usar max_hp
 	add_to_group("boss")
 	# Camadas: 1=player, 2=arena, 3=boss(4), 4=hurtbox(8).
 	collision_layer = 4
@@ -133,6 +147,8 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if state == State.DEAD:
 		return
+	if _guard_t > 0.0:
+		_guard_t = max(0.0, _guard_t - delta)
 	if state == State.FIGHT and not is_immune and stagger > 0.0:
 		stagger = max(0.0, stagger - stagger_decay * delta)
 		EventBus.boss_stagger_updated.emit(stagger, max_stagger)
@@ -164,7 +180,9 @@ func take_damage(amount: float) -> void:
 		return
 	var amt := amount
 	if state == State.STAGGERED:
-		amt *= stagger_stun_dmg_mult
+		amt *= stagger_stun_dmg_mult   # janela de stagger continua sendo o burst de DPS
+	elif _guard_t > 0.0:
+		amt *= mechanic_guard_mult     # proteção durante mecânica/troca de fase
 	if not is_immune:
 		current_hp = max(0.0, current_hp - amt)
 		EventBus.boss_health_updated.emit(current_hp)
@@ -177,6 +195,8 @@ func take_damage(amount: float) -> void:
 func add_stagger(amount: float) -> void:
 	if state == State.DEAD or state == State.STAGGERED:
 		return
+	if _stagger_immune:
+		return   # mecânica imune: postura não acumula nem quebra
 	stagger = min(max_stagger, stagger + amount)
 	EventBus.boss_stagger_updated.emit(stagger, max_stagger)
 	if stagger >= max_stagger and not is_immune and state == State.FIGHT:
@@ -220,7 +240,7 @@ func _after_attack(t: float) -> void:
 
 
 func _check_stun() -> void:
-	if _stun_pending and _alive():
+	if _stun_pending and not _stagger_immune and _alive():
 		await _do_stun()
 
 
@@ -273,7 +293,8 @@ func _flash(c: Color) -> void:
 		return
 	_flashing = true
 	_set_color(c)
-	await _sleep(0.08)
+	# Timer direto (não o _sleep interrompível): é só um flash visual de dano.
+	await get_tree().create_timer(0.08).timeout
 	_restore_body_color()
 	_flashing = false
 
@@ -286,7 +307,29 @@ func _alive() -> bool:
 
 
 func _sleep(t: float) -> void:
-	await get_tree().create_timer(t).timeout
+	# Fora da luta (intro/morte) ou com o recurso desligado: espera normal.
+	if not stagger_interrupts_attacks or state != State.FIGHT:
+		await get_tree().create_timer(t).timeout
+		return
+	# Na luta: a espera "acorda" cedo se a postura quebrar (corta o ataque atual),
+	# exceto numa mecânica imune a stagger.
+	var dt := get_physics_process_delta_time()
+	var elapsed := 0.0
+	while elapsed < t:
+		if state != State.FIGHT:
+			return
+		if _stun_pending and not _stagger_immune and not is_immune:
+			await _do_stun()
+			return
+		elapsed += dt
+		await get_tree().physics_frame
+
+
+# Liga/desliga a IMUNIDADE A STAGGER (mecânicas que não podem ser interrompidas).
+# Enquanto ligada, a barra de postura não enche nem quebra. As janelas de parry
+# (_await_counter) já ligam isso sozinhas; os portões usam `is_immune`.
+func _set_stagger_immune(on: bool) -> void:
+	_stagger_immune = on
 
 
 func _move_to(target: Vector2, speed: float) -> void:
@@ -299,17 +342,22 @@ func _move_to(target: Vector2, speed: float) -> void:
 # Espera o player apertar Parry dentro de `window`. `valid` (opcional) decide se
 # o parry conta (ex.: player no lado certo). Retorna true se parry válido.
 func _await_counter(window: float, valid: Callable = Callable()) -> bool:
+	# Mecânica de parry/counter é IMUNE a stagger: não dá pra "pular" com a quebra.
+	_set_stagger_immune(true)
 	_counter_flag = false
 	var dt := get_physics_process_delta_time()
 	var t := 0.0
+	var ok := false
 	while _alive() and t < window:
 		if _counter_flag:
 			_counter_flag = false
 			if not valid.is_valid() or valid.call():
-				return true
+				ok = true
+				break
 		t += dt
 		await get_tree().physics_frame
-	return false
+	_set_stagger_immune(false)
+	return ok
 
 
 # Cria um perigo (telegrafo -> ativo -> some). `skin` opcional troca o cubo.
@@ -443,6 +491,13 @@ func _play_anim(anim_name: String) -> void:
 			_cur_form.play(anim_name)
 
 
+# Liga a "proteção de mecânica": por `t` s o boss recebe dano reduzido
+# (mechanic_guard_mult). Use t<0 para a duração padrão (mechanic_guard_time).
+func _begin_mechanic_guard(t: float = -1.0) -> void:
+	var dur := t if t > 0.0 else mechanic_guard_time
+	_guard_t = maxf(_guard_t, dur)
+
+
 func _banner(text: String) -> void:
 	print("[%s] >>> %s" % [boss_name, text])
 	EventBus.boss_banner.emit(text)
@@ -452,6 +507,7 @@ func _banner(text: String) -> void:
 func _announce(text: String, color: Color = Color(1, 1, 1)) -> void:
 	print("[%s] >>> %s" % [boss_name, text])
 	EventBus.mechanic_announce.emit(text, "mech", color)
+	_begin_mechanic_guard()
 
 
 # Card de MUDANÇA DE FASE (azul claro por padrão).
@@ -459,6 +515,7 @@ func _phase_card(text: String, color: Color = Color(0.55, 0.85, 1.0)) -> void:
 	print("[%s] >>> %s" % [boss_name, text])
 	EventBus.boss_banner.emit(text)
 	EventBus.mechanic_announce.emit(text, "phase", color)
+	_begin_mechanic_guard()
 
 
 # Card de PORTÃO de stagger (dourado).
@@ -466,6 +523,7 @@ func _gate_card(text: String) -> void:
 	print("[%s] >>> %s" % [boss_name, text])
 	EventBus.boss_banner.emit(text)
 	EventBus.mechanic_announce.emit(text, "gate", Color(1.0, 0.85, 0.3))
+	_begin_mechanic_guard()
 
 
 # Card de WIPE / parry obrigatório (vermelho).
@@ -473,3 +531,4 @@ func _wipe_card(text: String) -> void:
 	print("[%s] >>> %s" % [boss_name, text])
 	EventBus.boss_banner.emit(text)
 	EventBus.mechanic_announce.emit(text, "wipe", Color(1.0, 0.3, 0.3))
+	_begin_mechanic_guard()

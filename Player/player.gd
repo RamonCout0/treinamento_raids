@@ -25,7 +25,7 @@ const DASH_COOLDOWN    := 0.40
 
 # --- ATAQUE / STAGGER (dano e stagger por golpe) ---
 const COMBO_WINDOW := 0.8
-const ATTACK_MOVE_FACTOR := 0.5   # quanto da velocidade você mantém atacando (não trava)
+const ATTACK_MOVE_FACTOR := 0.72   # quanto da velocidade você mantém atacando (não trava)
 const BUFFER_TIME := 0.25         # janela de buffer p/ encadear o próximo golpe
 # [dano, stagger] por passo de combo
 # OBS: o combo é rápido (encadeia com buffer), então o dano por golpe é baixo
@@ -252,10 +252,11 @@ func _apply_to_boss(target: Node) -> void:
 		target.take_damage(_cur_dmg)
 	if target.has_method("add_stagger"):
 		target.add_stagger(_cur_stagger)
-	# Game feel: hit-stop curto + shake leve + número.
-	# Heavy bate mais forte; combo 3 também (último golpe).
+	# Game feel: combos NÃO congelam o tempo (mantém o fluxo, sem travadinha a cada
+	# golpe). Só o Heavy dá um hit-stop curtinho pra dar peso ao impacto.
 	var is_heavy : bool = _cur_dmg >= HEAVY_DMG
-	GameFeel.hit_stop(0.08 if is_heavy else 0.05)
+	if is_heavy:
+		GameFeel.hit_stop(0.05)
 	GameFeel.shake_camera(5.0 if is_heavy else 2.5, 0.18)
 	GameFeel.spawn_damage_number(target.global_position, _cur_dmg,
 		Color(1.0, 0.85, 0.3) if is_heavy else Color(1.0, 0.95, 0.7))

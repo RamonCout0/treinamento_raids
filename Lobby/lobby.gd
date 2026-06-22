@@ -1,7 +1,7 @@
-# lobby.gd — HUB ENTRE RAIDS.
+# lobby.gd — HUB ENTRE RAIDS (único ponto de entrada do jogo).
 # ============================================================================
 # Player anda no hub e entra num PORTAL (chegar perto e apertar C) pra iniciar
-# a raid. Esc abre o menu de seleção rápida (estilo Mega Man).
+# a raid. O portal mais perto acende; os outros pulsam suavemente.
 # ============================================================================
 extends Node2D
 
@@ -19,12 +19,13 @@ const PORTALS := [
 const FLOOR_Y := 240.0
 const PORTAL_W := 28.0
 const PORTAL_H := 56.0
-const INTERACT_RANGE := 28.0
+const INTERACT_RANGE := 40.0
 
 var _player : CharacterBody2D
 var _hint   : Label
 var _title  : Label
-var _portal_nodes : Array = []   # [{rect:Rect2, raid:String, name:String}]
+var _portal_nodes : Array = []   # [{rect:Rect2, raid:String, name:String, core:ColorRect, color:Color}]
+var _pulse  := 0.0
 
 
 func _ready() -> void:
@@ -33,14 +34,24 @@ func _ready() -> void:
 	_build_portals()
 	_build_player()
 	_build_ui()
-	# Música ambiente do lobby = mesma do menu (campo Menu Music do AudioManager).
+	# Música ambiente do lobby (reaproveita o campo Menu Music do AudioManager).
 	AudioManager.play_music(AudioManager.menu_music)
 
 
-func _process(_dt: float) -> void:
+func _process(dt: float) -> void:
 	if _player == null or not is_instance_valid(_player):
 		return
+	_pulse += dt
 	var near = _portal_near_player()
+	# Realça o portal mais perto; os outros respiram numa pulsação suave.
+	for p in _portal_nodes:
+		var core : ColorRect = p["core"]
+		var base : Color = p["color"]
+		if is_same(p, near):
+			core.color = base.lightened(0.35)
+		else:
+			var a := 0.78 + 0.22 * (sin(_pulse * 3.0) * 0.5 + 0.5)
+			core.color = base * a
 	if near == null:
 		_hint.text = ""
 	else:
@@ -48,10 +59,6 @@ func _process(_dt: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
-		# Esc no lobby = menu de seleção (modo treino: 1 gate só).
-		get_tree().change_scene_to_file("res://UI/menu.tscn")
-		return
 	if event.is_action_pressed("grab"):
 		var near = _portal_near_player()
 		if near:
@@ -60,11 +67,15 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _portal_near_player():
 	var px : float = _player.global_position.x
+	var best = null
+	var best_d := INTERACT_RANGE
 	for p in _portal_nodes:
 		var r : Rect2 = p["rect"]
-		if absf(px - (r.position.x + r.size.x * 0.5)) <= INTERACT_RANGE:
-			return p
-	return null
+		var d := absf(px - (r.position.x + r.size.x * 0.5))
+		if d <= best_d:
+			best_d = d
+			best = p
+	return best
 
 
 # ── Construção do cenário ───────────────────────────────────────
@@ -131,11 +142,13 @@ func _build_portals() -> void:
 		lbl.size = Vector2(80.0, 12.0)
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		add_child(lbl)
-		# Registra zona de interação
+		# Registra zona de interação (guarda o núcleo p/ animar a pulsação/realce)
 		_portal_nodes.append({
 			"rect": Rect2(rect_pos, Vector2(PORTAL_W, PORTAL_H)),
 			"raid": p["id"],
 			"name": p["name"],
+			"core": core,
+			"color": Color(p["color"]),
 		})
 
 
@@ -158,7 +171,7 @@ func _build_ui() -> void:
 	layer.add_child(_title)
 
 	var sub := Label.new()
-	sub.text = "Andar (←→) · Pular (Espaço) · Entrar no portal (C) · Menu rápido (Esc)"
+	sub.text = "Andar (←→) · Pular (Espaço) · Dash (Shift) · Entrar no portal (C)"
 	sub.position = Vector2(0.0, 22.0)
 	sub.size = Vector2(480.0, 12.0)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

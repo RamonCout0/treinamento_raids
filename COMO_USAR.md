@@ -19,7 +19,7 @@ shader de brilho) feito pra ser **trocado pela sua arte** sem mexer na lógica.
 | **X** | Atacar (combo de 3) | o 3º golpe dá mais stagger |
 | **V** | **Heavy** carregado | **o que MAIS gera stagger** (abre janelas de DPS) |
 | **Z** | **Parry / Counter** | anula 1 golpe e dispara o sinal de counter — coração de várias mecânicas |
-| Esc | Voltar ao menu | |
+| Esc | Voltar ao lobby (durante a luta) | |
 
 O **parry** e o **heavy** são as ferramentas-chave: parry para defender/contra-atacar,
 heavy para quebrar a postura (stagger) dos chefes.
@@ -38,14 +38,15 @@ Entidades/Comum/
 Entidades/<Boss>/<boss>.gd|.tscn   # os 5 chefes (só a coreografia)
 Arenas/arena.gd              # monta cenário + tela de vitória/derrota
 Arenas/arena_<boss>.tscn     # 1 arena por chefe
-UI/menu / boss_hud / player_hud
+Lobby/lobby.gd               # hub com os portais (entrada do jogo)
+UI/boss_hud / player_hud / cinematic_hud
 Shaders_Efeitos/perigo.gdshader
 ```
 
 **5 Raids × 3 gates** (Gate 1 → Gate 2 → BOSS), inspirado nas raids do Lost Ark.
-A cena principal é o **LOBBY** (`Lobby/lobby.tscn`): andar até um portal e apertar
-**C** entra na raid. Vencer um gate → carrega o próximo. Esc volta ao lobby ou
-ao menu (modo treino).
+A cena principal é o **LOBBY** (`Lobby/lobby.tscn`) — único ponto de entrada do
+jogo: andar até um portal e apertar **C** entra na raid. Vencer um gate → carrega o
+próximo; após o boss final volta ao lobby. **Esc**, durante uma luta, volta ao lobby.
 
 **Raid 1 — Silvanna (mágica/gelo/lâminas)**
 - Gate 1 · *Eira* — cristais em círculo + lanças + zona segura + portão nevasca
@@ -161,7 +162,7 @@ Arraste sua `.tscn` no campo do ataque correspondente:
 Tudo passa pelo autoload **`AudioManager`**. Abra `Manager/AudioManager.tscn` e
 arraste seus arquivos (`.ogg`/`.wav`/`.mp3`) nos campos. Vazio = silêncio.
 
-- **Música do menu:** campo `Menu Music` no `AudioManager`.
+- **Música do lobby:** campo `Menu Music` no `AudioManager` (o lobby reaproveita esse campo).
 - **Música de cada luta:** campo `Arena Music` na cena de cada `Arenas/arena_*.tscn`.
 - **SFX automáticos** (campos no `AudioManager`): `Sfx Hit` (acertou o boss),
   `Sfx Parry`, `Sfx Stagger` (quebrou a postura), `Sfx Boss Death`,
@@ -206,23 +207,42 @@ de moldura ao redor — o que importa é o corpo preencher mais ou menos isso.
 
 Selecione o chefe na arena e edite os grupos exportados:
 - **Vida e Stagger:** `max_hp`, `hp_per_bar` (tamanho de cada barra),
-  `max_stagger`, `stagger_decay`, `stagger_stun_time`, `stagger_stun_dmg_mult`.
+  `max_stagger`, `stagger_decay`, `stagger_stun_time`, `stagger_stun_dmg_mult`,
+  `stagger_interrupts_attacks` (quebra **corta o ataque atual** na hora; veja seção 7).
 - **Arena:** `arena_left/right/top/floor`, `hover_height`, `move_speed`
   (combine os limites com os de `Arenas/arena.gd` se mudar o tamanho).
 - Cada chefe tem seu grupo próprio (telegrafo, janelas de parry, dano, intervalos…).
 
 ### Ritmo Global (multiplicadores) — todos os chefes
 
-Todo chefe herda da `BossBase` o grupo **"Ritmo Global (multiplicadores)"**: quatro
-multiplicadores que escalam o "feel" da luta inteira sem mexer ataque por ataque.
-O default de todos é **1.0** (não muda nada). Diminua para deixar mais lento/fácil,
-aumente para acelerar/endurecer:
-- `telegraph_mult` — escala o tempo de **aviso** (telegrafo) de TODO perigo/círculo/
-  zona segura. >1.0 = mais tempo pra reagir; <1.0 = avisos mais curtos (mais difícil).
-- `active_mult` — escala o tempo em que o perigo fica **dando dano** (janela ativa).
-- `projectile_speed_mult` — escala a **velocidade de todos os projéteis** do chefe.
-- `recovery_mult` — escala as **pausas entre ataques** (o `_after_attack`). >1.0 dá
-  mais respiro entre golpes.
+Todo chefe herda da `BossBase` o grupo **"Ritmo Global (multiplicadores)"**, que
+escala o "feel" da luta inteira sem mexer ataque por ataque. Diminua para deixar
+mais lento/fácil, aumente para acelerar/endurecer:
+- **`hp_mult`** *(default `5.0`)* — **botão de DURAÇÃO da luta.** Multiplica a vida
+  total (`max_hp`) ao iniciar. É o principal ajuste pra mirar os **3-5 min** por
+  raid: se uma luta termina rápido demais, **aumente**; se arrasta, **diminua**.
+- `telegraph_mult` *(default `1.0`)* — escala o tempo de **aviso** (telegrafo) de
+  TODO perigo/círculo/zona segura. >1.0 = mais tempo pra reagir; <1.0 = mais difícil.
+- `active_mult` *(default `1.0`)* — escala o tempo em que o perigo fica **dando
+  dano** (janela ativa).
+- `projectile_speed_mult` *(default `1.0`)* — escala a **velocidade de todos os
+  projéteis** do chefe.
+- `recovery_mult` *(default `1.25`)* — escala as **pausas entre ataques** (o
+  `_after_attack`). >1.0 dá mais respiro entre golpes (luta menos corrida).
+
+### Proteção em Mecânicas — todos os chefes
+
+Também na `BossBase`, o grupo **"Proteção em Mecânicas"** dá ao chefe **dano
+reduzido durante mecânicas e trocas de fase** (estilo Lost Ark: enquanto você lê e
+se posiciona, o boss não derrete). A proteção liga **automaticamente** sempre que o
+chefe anuncia algo (`_announce`/`_phase_card`/`_gate_card`/`_wipe_card`):
+- `mechanic_guard_mult` *(default `0.5`)* — multiplicador do dano recebido enquanto a
+  proteção está ativa (0.5 = metade do dano; 1.0 desliga a redução).
+- `mechanic_guard_time` *(default `3.0`)* — duração em segundos da proteção a cada
+  anúncio de mecânica/fase.
+
+A janela de **stagger** (atordoamento) **ignora** essa proteção de propósito —
+continua sendo seu burst de DPS com dano dobrado.
 
 ### Tempos e velocidade — por chefe (gates)
 
@@ -256,6 +276,15 @@ Dano/stagger do player ficam em `Player/player.gd` (`COMBO_DMG`, `COMBO_STAGGER`
   `take_damage()` (tira HP) **e** `add_stagger()` (enche a barra amarela).
 - Encheu o stagger → **atordoado**: toca `staggered`, fica amarelo e leva
   **dano dobrado** (`stagger_stun_dmg_mult`) — sua janela de DPS.
+- **Quebra responsiva (estilo Lost Ark):** ao encher a barra, a quebra **corta o
+  ataque em andamento** quase na hora (não espera o ataque terminar). Controle pelo
+  `stagger_interrupts_attacks` (desligue pra voltar a só quebrar entre ataques).
+- **Mecânicas IMUNES a stagger:** algumas mecânicas não podem ser interrompidas —
+  enquanto rolam, a barra de postura **não enche nem quebra**. Já são imunes
+  automaticamente: as **janelas de parry/counter** (`_await_counter`) e os **portões**
+  (`_stagger_gate`, que usam a barra pra *passar*, não pra quebrar). Para marcar uma
+  mecânica sua como imune, chame `_set_stagger_immune(true)` no início e
+  `_set_stagger_immune(false)` no fim do trecho.
 - **Parry (Z):** anula o golpe; em mecânicas de duelo/ilusão/wipe ele é obrigatório.
 - **Transições/portões:** o stagger vira um **portão** (encha a tempo, senão é wipe).
 - Todo perigo **pisca (telegrafo)** antes de virar **sólido (dano)**. **Dash atravessa.**
@@ -268,16 +297,19 @@ Dano/stagger do player ficam em `Player/player.gd` (`COMBO_DMG`, `COMBO_STAGGER`
    ```gdscript
    extends BossBase
    func fight() -> void:
-       _banner("MINHA LUTA")
-       _set_body("", Color(0.5, 0.5, 0.5))
-       while _alive():
-           # use os helpers: _move_to, _spawn_hazard, _spawn_projectile,
-           # _await_counter, add_stagger, _after_attack(pausa)...
-           await _after_attack(1.2)
+	   _banner("MINHA LUTA")
+	   _set_body("", Color(0.5, 0.5, 0.5))
+	   while _alive():
+		   # use os helpers: _move_to, _spawn_hazard, _spawn_projectile,
+		   # _await_counter, add_stagger, _after_attack(pausa)...
+		   await _after_attack(1.2)
    ```
 2. Crie `novoboss.tscn` (um `CharacterBody2D` + o script + tuning).
 3. Duplique uma `Arenas/arena_*.tscn`, troque o chefe e o `arena_tint`.
-4. Adicione a entrada em `UI/menu.gd` (`BOSSES`).
+4. Encaixe na sequência: se for um gate de uma raid existente, adicione a `.tscn` da
+   arena ao array da raid em `Manager/RaidManager.gd` (`raids`). Se for uma **raid
+   nova**, crie a chave em `raids` e adicione um portal em `Lobby/lobby.gd`
+   (constante `PORTALS`).
 
 O motor (`BossBase`) cuida de vida, stagger, atordoamento, formas, hurtbox,
 camadas de colisão e morte. Você escreve **só a dança**.

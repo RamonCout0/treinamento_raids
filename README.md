@@ -33,7 +33,7 @@ godot --headless --path . --import
 | **X** | Atacar (combo de 3; o 3º dá mais stagger) |
 | **V** | Heavy carregado (o que mais gera stagger) |
 | **Z** | Parry / Counter (anula 1 golpe, dispara o sinal de counter) |
-| Esc | Voltar ao lobby/menu |
+| Esc | Voltar ao lobby (durante a luta) |
 
 Parry e heavy são as ferramentas-chave: parry para defender/contra-atacar, heavy
 para quebrar a postura (stagger) e abrir janelas de DPS.
@@ -51,7 +51,7 @@ Entidades/Comum/
   projectile.gd              # projétil (reto/teleguiado/ricochete)
 Entidades/<Raid>/<boss>.gd   # os chefes (só a coreografia em fight())
 Arenas/                      # cenário + tela de vitória/derrota; 1 arena por chefe
-UI/                          # menu, HUDs, números de dano
+UI/                          # HUDs (boss/player/cinemático), números de dano
 Shaders_Efeitos/             # shader de brilho dos perigos
 ```
 
@@ -59,8 +59,15 @@ Shaders_Efeitos/             # shader de brilho dos perigos
 
 Veja **[COMO_USAR.md](COMO_USAR.md)** para o guia completo: trocar placeholders pela
 sua arte (player, chefes, ataques), áudio, resolução dos sprites, ajuste de
-dificuldade (multiplicadores globais de ritmo e os campos "Tempos e velocidade" por
-chefe) e como adicionar um novo chefe.
+dificuldade e como adicionar um novo chefe.
+
+> **Duração da raid (3-5 min):** o botão principal é o `hp_mult` da `BossBase`
+> (default `5.0`) — sobe/desce a vida total de todos os chefes. Cada chefe também
+> recebe **dano reduzido durante mecânicas e trocas de fase** (grupo "Proteção em
+> Mecânicas"). Tudo exportado no Inspetor; veja a seção 6 do COMO_USAR.
+
+> **Feel:** combos não congelam o tempo (sem "travadinha" a cada golpe — só o Heavy
+> dá um hit-stop curto), e dá pra atacar/dar dash em movimento sem travar.
 
 ## Licença
 

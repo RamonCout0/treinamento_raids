@@ -10,7 +10,6 @@
 extends Node2D
 
 @export var arena_tint  : Color  = Color(0.08, 0.08, 0.12)
-@export var menu_scene  : String = "res://UI/menu.tscn"
 @export var arena_music : AudioStream   ## música da luta (arraste no Inspetor)
 
 @export_group("Limites (combine com os do boss)")
