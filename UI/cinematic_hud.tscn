@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cmk0f3oucpx33"]
+
+[ext_resource type="Script" path="res://UI/cinematic_hud.gd" id="1"]
+
+[node name="CinematicHUD" type="CanvasLayer"]
+script = ExtResource("1")

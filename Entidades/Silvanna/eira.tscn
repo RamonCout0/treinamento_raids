@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://raidoboss_eira"]
+[ext_resource type="Script" path="res://Entidades/Silvanna/eira.gd" id="1"]
+[node name="Eira" type="CharacterBody2D"]
+script = ExtResource("1")
+boss_name = "Eira, a Acólita do Gelo"
+epithet = "Cristais cantam onde ela pisa. Fique no centro — ou congele."
+portrait_color = Color(0.55, 0.85, 1.0, 1)
+body_size = Vector2(36, 44)
+max_hp = 70000.0
+hp_per_bar = 1000.0
+max_stagger = 4000.0

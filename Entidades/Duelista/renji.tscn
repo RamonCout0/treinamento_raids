@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://raidoboss_renji"]
+[ext_resource type="Script" path="res://Entidades/Duelista/renji.gd" id="1"]
+[node name="Renji" type="CharacterBody2D"]
+script = ExtResource("1")
+boss_name = "Renji, o Discípulo"
+epithet = "Cada golpe é uma pergunta. Aprenda a responder com aço (Z)."
+portrait_color = Color(0.70, 0.80, 1.00, 1)
+body_size = Vector2(34, 46)
+max_hp = 22000.0
+hp_per_bar = 1000.0
+max_stagger = 4000.0

@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://raidoboss4tece"]
+
+[ext_resource type="Script" path="res://Entidades/Tecela/tecela.gd" id="1"]
+
+[node name="Tecela" type="CharacterBody2D"]
+script = ExtResource("1")
+boss_name = "Nyx, a Tecelã de Ilusões"
+epithet = "Tantas cópias quanto dúvidas. Só uma é a verdade."
+portrait_color = Color(0.62, 0.35, 0.82, 1)
+body_size = Vector2(34, 44)
+max_hp = 36000.0
+hp_per_bar = 1000.0
+max_stagger = 5000.0

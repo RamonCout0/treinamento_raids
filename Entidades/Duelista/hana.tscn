@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://raidoboss_hana"]
+[ext_resource type="Script" path="res://Entidades/Duelista/hana.gd" id="1"]
+[node name="Hana" type="CharacterBody2D"]
+script = ExtResource("1")
+boss_name = "Hana, a Mestra dos Arremessos"
+epithet = "Cruz, leque, círculo. O padrão decide se você vive."
+portrait_color = Color(0.95, 0.70, 0.50, 1)
+body_size = Vector2(34, 44)
+max_hp = 75000.0
+hp_per_bar = 1000.0
+max_stagger = 4500.0

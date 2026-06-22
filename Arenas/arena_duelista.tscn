@@ -1,0 +1,21 @@
+[gd_scene load_steps=6 format=3 uid="uid://raidoarena2"]
+
+[ext_resource type="Script" path="res://Arenas/arena.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://raidoplayer001" path="res://Player/player.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://raidoboss2duel" path="res://Entidades/Duelista/duelista.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://raidohudboss01" path="res://UI/boss_hud.tscn" id="4"]
+[ext_resource type="PackedScene" uid="uid://raidohudplayer" path="res://UI/player_hud.tscn" id="5"]
+
+[node name="ArenaDuelista" type="Node2D"]
+script = ExtResource("1")
+arena_tint = Color(0.14, 0.11, 0.09, 1)
+
+[node name="Player" parent="." instance=ExtResource("2")]
+position = Vector2(60, 240)
+
+[node name="BossHUD" parent="." instance=ExtResource("4")]
+
+[node name="PlayerHUD" parent="." instance=ExtResource("5")]
+
+[node name="Boss" parent="." instance=ExtResource("3")]
+position = Vector2(300, 232)

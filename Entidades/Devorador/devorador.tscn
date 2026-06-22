@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://raidoboss5devo"]
+
+[ext_resource type="Script" path="res://Entidades/Devorador/devorador.gd" id="1"]
+
+[node name="Devorador" type="CharacterBody2D"]
+script = ExtResource("1")
+boss_name = "Vorth, o Devorador"
+epithet = "Devora a terra. Devora o céu. Devora você."
+portrait_color = Color(0.82, 0.28, 0.32, 1)
+body_size = Vector2(48, 52)
+max_hp = 45000.0
+hp_per_bar = 1000.0
+max_stagger = 6000.0
+th_air = 28000.0
+th_wipe = 11000.0
+final_dps_check = 12000.0

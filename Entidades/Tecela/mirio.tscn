@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://raidoboss_mirio"]
+[ext_resource type="Script" path="res://Entidades/Tecela/mirio.gd" id="1"]
+[node name="Mirio" type="CharacterBody2D"]
+script = ExtResource("1")
+boss_name = "Mirio, os Gêmeos Espelho"
+epithet = "Dois corpos, uma vida. O que pisca em dourado é o real."
+portrait_color = Color(0.55, 0.45, 0.90, 1)
+body_size = Vector2(32, 44)
+max_hp = 85000.0
+hp_per_bar = 1000.0
+max_stagger = 5000.0

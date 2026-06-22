@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://raidoboss_lira"]
+[ext_resource type="Script" path="res://Entidades/Tecela/lira.gd" id="1"]
+[node name="Lira" type="CharacterBody2D"]
+script = ExtResource("1")
+boss_name = "Lira, a Vidente"
+epithet = "Ela vê o seu próximo passo. Aprenda a ver o dela."
+portrait_color = Color(0.70, 0.50, 1.00, 1)
+body_size = Vector2(32, 44)
+max_hp = 70000.0
+hp_per_bar = 1000.0
+max_stagger = 4000.0

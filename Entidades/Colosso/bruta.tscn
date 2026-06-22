@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://raidoboss_bruta"]
+[ext_resource type="Script" path="res://Entidades/Colosso/bruta.gd" id="1"]
+[node name="Bruta" type="CharacterBody2D"]
+script = ExtResource("1")
+boss_name = "Bruta, a Sentinela"
+epithet = "Cada estaca abre o chão. Cada onda fecha o caminho."
+portrait_color = Color(0.60, 0.55, 0.45, 1)
+body_size = Vector2(52, 70)
+hover_height = 36.0
+move_speed = 200.0
+max_hp = 45000.0
+hp_per_bar = 1500.0
+max_stagger = 6000.0
+stagger_decay = 200.0

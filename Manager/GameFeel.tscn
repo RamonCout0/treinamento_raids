@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bsuvb7ll4lvdj"]
+
+[ext_resource type="Script" path="res://Manager/GameFeel.gd" id="1"]
+
+[node name="GameFeel" type="Node"]
+script = ExtResource("1")

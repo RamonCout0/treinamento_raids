@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://raidoboss_asha"]
+[ext_resource type="Script" path="res://Entidades/Devorador/asha.gd" id="1"]
+[node name="Asha" type="CharacterBody2D"]
+script = ExtResource("1")
+boss_name = "Asha, a Salamandra"
+epithet = "O fogo segue seus passos. Cuidado onde você pisa."
+portrait_color = Color(1.00, 0.55, 0.20, 1)
+body_size = Vector2(44, 36)
+max_hp = 80000.0
+hp_per_bar = 1000.0
+max_stagger = 5000.0
