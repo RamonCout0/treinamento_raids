@@ -8,7 +8,7 @@ extends BossBase
 
 @export_group("Mygur")
 @export var charge_damage : float = 2_200.0
-@export var charge_speed  : float = 460.0
+@export var charge_speed  : float = 920.0
 @export var jump_damage   : float = 2_400.0
 @export var jump_radius   : float = 40.0
 @export var pause         : float = 0.9

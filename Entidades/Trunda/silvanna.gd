@@ -27,7 +27,7 @@ extends BossBase
 @export var pendulo_damage : float = 2_000.0
 @export var pendulo_range  : float = 30.0
 @export var laser_telegraph : float = 0.8
-@export var laser_speed     : float = 170.0
+@export var laser_speed     : float = 340.0
 @export var laser_damage    : float = 1_800.0
 @export var corte_damage    : float = 2_400.0
 @export var espadas_damage  : float = 2_600.0
@@ -37,11 +37,11 @@ extends BossBase
 
 @export_group("Silvanna: Transições/Eventos")
 @export var vortice_time : float = 22.0
-@export var vortice_pull : float = 200.0
+@export var vortice_pull : float = 400.0
 @export var trans2_time  : float = 18.0
 @export var espelho_laser_interval : float = 1.1
 @export var espelho_laser_damage   : float = 1_400.0
-@export var vassoura_wind : float = 240.0
+@export var vassoura_wind : float = 480.0
 @export var vassoura_time : float = 6.0
 @export var vassoura_counter_window : float = 1.8
 
@@ -294,7 +294,7 @@ func _atk_facas() -> void:
 		var frac := (float(k) / 4.0) - 0.5
 		var ang := base + deg_to_rad(80.0 * frac)
 		_spawn_projectile(PROJECTILE.Mode.BOUNCE, origin, Vector2.RIGHT.rotated(ang),
-			380.0, 800.0, false, skin_faca, Vector2(12, 4), Color(0.9, 0.9, 0.6))
+			760.0, 800.0, false, skin_faca, Vector2(12, 4), Color(0.9, 0.9, 0.6))
 	await _sleep(0.4)
 
 
@@ -304,7 +304,7 @@ func _atk_dragao() -> void:
 		if not _alive(): return
 		var origin := _muzzle_pos()
 		var dir : Vector2 = (_player.global_position - origin).normalized() if _player_alive() else Vector2.DOWN
-		_spawn_projectile(PROJECTILE.Mode.HOMING, origin, dir, 180.0, 1500.0,
+		_spawn_projectile(PROJECTILE.Mode.HOMING, origin, dir, 360.0, 1500.0,
 			true, skin_dragao, Vector2(28, 20), Color(1.0, 0.4, 0.0, 0.9))
 		await _sleep(0.5)
 	await _sleep(2.0)

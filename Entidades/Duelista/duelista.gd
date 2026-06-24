@@ -165,7 +165,7 @@ func _thrown_sword() -> void:
 	if not _player_alive(): return
 	_play_anim("throw")
 	var dir := (_player.global_position - global_position).normalized()
-	_spawn_projectile(PROJECTILE.Mode.STRAIGHT, global_position, dir, 360.0,
+	_spawn_projectile(PROJECTILE.Mode.STRAIGHT, global_position, dir, 720.0,
 		throw_damage, true, skin_espada_arremesso, Vector2(20, 6), Color(0.8, 0.85, 1.0))
 
 

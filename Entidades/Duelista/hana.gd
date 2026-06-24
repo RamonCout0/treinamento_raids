@@ -12,11 +12,11 @@ extends BossBase
 @export var pause : float = 1.0
 
 @export_group("Hana: Velocidade dos shurikens")
-@export var cross_speed  : float = 280.0
-@export var fan_speed    : float = 300.0
-@export var circle_speed : float = 250.0
-@export var homing_speed : float = 200.0
-@export var rain_speed   : float = 240.0
+@export var cross_speed  : float = 560.0
+@export var fan_speed    : float = 600.0
+@export var circle_speed : float = 500.0
+@export var homing_speed : float = 400.0
+@export var rain_speed   : float = 480.0
 @export var gate_time    : float = 10.0
 
 @export_group("Hana: Skins (opcional)")

@@ -96,7 +96,7 @@ func _atk_twin_fan() -> void:
 	for k in 5:
 		var ang := -PI * 0.5 + deg_to_rad(30.0 * (float(k) - 2.0))
 		_spawn_projectile(PROJECTILE.Mode.STRAIGHT, global_position,
-			Vector2.RIGHT.rotated(ang), 300.0, slash_damage * 0.8, false,
+			Vector2.RIGHT.rotated(ang), 600.0, slash_damage * 0.8, false,
 			null, Vector2(14, 6), Color(0.85, 0.85, 1.0))
 	await _sleep(0.6)
 

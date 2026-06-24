@@ -12,7 +12,7 @@ extends BossBase
 @export var spit_radius   : float = 32.0
 @export var spit_damage   : float = 1_600.0
 @export var dive_damage   : float = 2_400.0
-@export var dive_speed    : float = 580.0
+@export var dive_speed    : float = 1160.0
 @export var pause         : float = 1.0
 @export var th_gate_pct   : float = 0.55
 
@@ -55,7 +55,7 @@ func _atk_spit() -> void:
 	var target := _player.global_position
 	# projétil rápido pra criar suspense
 	_spawn_projectile(PROJECTILE.Mode.STRAIGHT, global_position,
-		(target - global_position).normalized(), 320.0, spit_damage * 0.5,
+		(target - global_position).normalized(), 640.0, spit_damage * 0.5,
 		true, skin_cuspe, Vector2(14, 14), Color(1.0, 0.45, 0.1))
 	# o telegrafo do círculo já avisa antes da explosão
 	_spawn_circle(target, spit_radius, Color(1.0, 0.4, 0.1),
@@ -105,7 +105,7 @@ func _atk_cross_flame() -> void:
 	var angs := [PI * 0.25, PI * 0.75, PI * 1.25, PI * 1.75] if diag else [0.0, PI * 0.5, PI, PI * 1.5]
 	for a in angs:
 		_spawn_projectile(PROJECTILE.Mode.STRAIGHT, c, Vector2.RIGHT.rotated(a),
-			260.0, spit_damage, false, skin_cuspe, Vector2(14, 6), Color(1.0, 0.5, 0.2))
+			520.0, spit_damage, false, skin_cuspe, Vector2(14, 6), Color(1.0, 0.5, 0.2))
 	await _sleep(0.7)
 
 

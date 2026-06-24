@@ -9,19 +9,30 @@
 # ============================================================================
 extends Node2D
 
+# O viewport real do projeto continua 480x270 — a arena agora é 2x maior
+# (em cada eixo) que isso, então a câmera passa a SEGUIR o player (em vez de
+# ficar fixa centralizada) com limites pra nunca mostrar além do fundo pintado.
+const WORLD_W := 960.0
+const WORLD_H := 540.0
+
 @export var arena_tint  : Color  = Color(0.08, 0.08, 0.12)
 @export var arena_music : AudioStream   ## música da luta (arraste no Inspetor)
+## Arte de fundo opcional (substitui o ColorRect do arena_tint). Desenhe em
+## 960x540 (WORLD_W x WORLD_H) p/ cobrir a arena toda sem repetir/distorcer —
+## a câmera dá pan por cima dela. Deixe vazio pra manter o placeholder de cor.
+@export var background_texture : Texture2D
 
 @export_group("Limites (combine com os do boss)")
-@export var arena_left  : float = 16.0
-@export var arena_right : float = 464.0
-@export var arena_top   : float = 16.0
-@export var arena_floor : float = 252.0
+@export var arena_left  : float = 32.0
+@export var arena_right : float = 928.0
+@export var arena_top   : float = 32.0
+@export var arena_floor : float = 504.0
 
 ## Plataformas sólidas (Rect2 em coords da arena). Úteis p/ fases aéreas.
 @export var platforms : Array[Rect2] = []
 
 var _result_label : Label
+var _bg_sprite : Sprite2D = null   ## referência viva p/ set_background() troca em tempo real
 var _done := false
 var _won  := false   ## evita derrota mandar pro próximo gate
 
@@ -38,11 +49,23 @@ func _ready() -> void:
 	EventBus.player_died.connect(_on_lose)
 
 
-# Camera2D fixa centralizada (necessária pro shake do GameFeel).
+# Camera2D que segue o player (necessária pro shake do GameFeel). Zoom fica
+# em 1.0 (não muda); os limites travam a câmera dentro do fundo pintado, então
+# ela nunca mostra vazio além da arena.
 func _build_camera() -> void:
 	var cam := Camera2D.new()
-	cam.position = Vector2(240.0, 135.0)   # centro da viewport 480x270
-	add_child(cam)
+	cam.limit_left   = 0
+	cam.limit_top    = 0
+	cam.limit_right  = WORLD_W
+	cam.limit_bottom = WORLD_H
+	cam.position_smoothing_enabled = true
+	cam.position_smoothing_speed = 8.0
+	var player := get_tree().get_first_node_in_group("player")
+	if player:
+		player.add_child(cam)
+	else:
+		add_child(cam)
+		cam.position = Vector2(WORLD_W * 0.5, WORLD_H * 0.5)
 	cam.make_current.call_deferred()
 
 
@@ -59,6 +82,15 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _build_background() -> void:
+	if background_texture:
+		_bg_sprite = Sprite2D.new()
+		_bg_sprite.centered = false
+		_bg_sprite.z_index = -100   # atrás do chão/paredes (que usam z_index -5)
+		add_child(_bg_sprite)
+		set_background(background_texture)
+		return
+
+	# Placeholder: ColorRect full-rect (sem textura definida).
 	var layer := CanvasLayer.new()
 	layer.layer = -10
 	var bg := ColorRect.new()
@@ -67,6 +99,25 @@ func _build_background() -> void:
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(bg)
 	add_child(layer)
+
+
+## Troca a arte de fundo em tempo real (ex.: mudança de cenário numa transição
+## de fase). Bosses chamam isto via `get_parent().set_background(tex)` — o
+## Boss é filho direto da Arena. Desenhe a textura em 960x540 (WORLD_W x
+## WORLD_H) igual à arte inicial. Se a arena começou no placeholder de cor
+## (sem `background_texture`), a primeira chamada já cria o Sprite2D.
+func set_background(tex: Texture2D) -> void:
+	if not tex:
+		return
+	if not is_instance_valid(_bg_sprite):
+		_bg_sprite = Sprite2D.new()
+		_bg_sprite.centered = false
+		_bg_sprite.z_index = -100
+		add_child(_bg_sprite)
+	_bg_sprite.texture = tex
+	var tex_size := tex.get_size()
+	if tex_size.x > 0.0 and tex_size.y > 0.0:
+		_bg_sprite.scale = Vector2(WORLD_W / tex_size.x, WORLD_H / tex_size.y)
 
 
 func _build_geometry() -> void:
@@ -83,10 +134,10 @@ func _build_geometry() -> void:
 	_add_collider(body, Vector2((arena_left + arena_right) * 0.5, arena_top - 6.0), Vector2(w + 40.0, 12.0))      # teto
 
 	# Visuais placeholder (chão + paredes).
-	var floorv := _rect(Vector2(arena_left - 20.0, arena_floor), Vector2(w + 40.0, 270.0 - arena_floor + 20.0), arena_tint.lightened(0.10))
+	var floorv := _rect(Vector2(arena_left - 20.0, arena_floor), Vector2(w + 40.0, WORLD_H - arena_floor + 20.0), arena_tint.lightened(0.10))
 	add_child(floorv)
-	add_child(_rect(Vector2(0, 0), Vector2(arena_left, 270.0), arena_tint.darkened(0.2)))
-	add_child(_rect(Vector2(arena_right, 0), Vector2(480.0 - arena_right, 270.0), arena_tint.darkened(0.2)))
+	add_child(_rect(Vector2(0, 0), Vector2(arena_left, WORLD_H), arena_tint.darkened(0.2)))
+	add_child(_rect(Vector2(arena_right, 0), Vector2(WORLD_W - arena_right, WORLD_H), arena_tint.darkened(0.2)))
 
 	# Plataformas sólidas (colisão + visual).
 	for pf in platforms:

@@ -40,7 +40,7 @@ extends BossBase
 @export_group("Goliah: Soco de Estilhaços")
 @export var soco_shard_count    : int   = 7
 @export var soco_shard_damage   : float = 1_200.0
-@export var soco_shard_speed    : float = 280.0
+@export var soco_shard_speed    : float = 560.0
 @export var soco_spread_deg     : float = 70.0   ## abertura total do leque
 @export var soco_telegraph      : float = 0.6
 @export var soco_recover        : float = 0.7
@@ -52,14 +52,14 @@ extends BossBase
 @export var rocha_invoke_time     : float = 1.6   ## animação longa (arranca)
 @export var rocha_counter_window  : float = 0.55
 @export var rocha_damage          : float = 4_200.0
-@export var rocha_speed           : float = 220.0
+@export var rocha_speed           : float = 440.0
 @export var rocha_recover         : float = 1.0
 
 
 # --- ATAQUE 3: Hélice de Estilhaços (Draven) ---
 @export_group("Goliah: Hélice de Estilhaços")
 @export var helice_damage      : float = 1_800.0
-@export var helice_speed       : float = 240.0
+@export var helice_speed       : float = 480.0
 @export var helice_out_time    : float = 1.3   ## quanto vai antes de voltar
 @export var helice_recover     : float = 0.7
 
@@ -95,7 +95,7 @@ extends BossBase
 @export_group("Goliah: Mãos de Gelo")
 @export var maos_hand_width       : float = 50.0
 @export var maos_hand_height      : float = 90.0
-@export var maos_close_speed      : float = 6.0   ## px/s — bem lento, pra dar tempo
+@export var maos_close_speed      : float = 12.0   ## px/s — bem lento, pra dar tempo
 @export var maos_min_distance     : float = 60.0  ## abaixo disso esmaga (wipe)
 @export var maos_hand_max_hp      : float = 3_500.0   ## "vida" de cada luva pra empurrar
 @export var maos_glow_interval_min : float = 3.0
@@ -263,7 +263,7 @@ func _spawn_boomerang_helice(from: Vector2, dir: Vector2) -> void:
 # até sair do alcance ou completar o ciclo.
 class IceAxe extends Node2D:
 	var _dir : Vector2 = Vector2.RIGHT
-	var _speed : float = 240.0
+	var _speed : float = 480.0
 	var _damage : float = 1_800.0
 	var _out_time : float = 1.3
 	var _t : float = 0.0

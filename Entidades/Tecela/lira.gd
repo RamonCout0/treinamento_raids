@@ -12,7 +12,7 @@ extends BossBase
 @export var th_gate_pct    : float = 0.55
 
 @export_group("Lira: Tempos e velocidade")
-@export var x_speed         : float = 280.0
+@export var x_speed         : float = 560.0
 @export var line_telegraph  : float = 0.8
 @export var line_late       : float = 1.1
 @export var cross_telegraph : float = 0.9

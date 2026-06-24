@@ -11,11 +11,11 @@ script = ExtResource("1")
 arena_tint = Color(0.1, 0.1, 0.16, 1)
 
 [node name="Player" parent="." unique_id=1147452153 instance=ExtResource("2")]
-position = Vector2(60, 240)
+position = Vector2(120, 480)
 
 [node name="BossHUD" parent="." unique_id=1401862271 instance=ExtResource("4")]
 
 [node name="PlayerHUD" parent="." unique_id=1347727893 instance=ExtResource("5")]
 
 [node name="Boss" parent="." unique_id=1140258932 instance=ExtResource("3")]
-position = Vector2(240, 110)
+position = Vector2(480, 220)

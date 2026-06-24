@@ -31,7 +31,7 @@ extends BossBase
 # --- ATAQUE PADRÃO 1: Investida Espada ---
 @export_group("Mortheus: Investida Espada")
 @export var dash_damage        : float = 1_900.0
-@export var dash_speed         : float = 540.0
+@export var dash_speed         : float = 1080.0
 @export var dash_telegraph     : float = 0.45  ## tempo piscando antes de dashar
 @export var dash_recover       : float = 0.6
 
@@ -64,11 +64,11 @@ extends BossBase
 @export var salva_shield_max          : float = 2_500.0   ## tamanho do ESCUDO (refilla cada ciclo)
 @export var salva_main_cycles_needed  : int   = 4          ## quantos counters bem-sucedidos pra vencer
 @export var salva_time_limit          : float = 60.0       ## tempo máx até wipe (mech demora)
-@export var salva_mortheus_start_x    : float = 60.0       ## boss começa na ESQUERDA
-@export var salva_mortheus_walk_speed : float = 18.0       ## px/s (lento, empurrando)
+@export var salva_mortheus_start_x    : float = 120.0      ## boss começa na ESQUERDA
+@export var salva_mortheus_walk_speed : float = 36.0       ## px/s (lento, empurrando)
 @export var salva_push_distance       : float = 22.0       ## gap mínimo Mortheus⇄player (shove)
 @export var salva_soldier_count       : int   = 3          ## soldados estacionários na direita
-@export var salva_soldier_start_x     : float = 420.0      ## x do primeiro soldado
+@export var salva_soldier_start_x     : float = 840.0      ## x do primeiro soldado
 @export var salva_soldier_spacing     : float = 14.0       ## entre soldados
 @export var salva_soldier_kill_dist   : float = 20.0       ## dist do soldado que mata
 @export var salva_counter_telegraph   : float = 0.45
@@ -92,7 +92,7 @@ extends BossBase
 @export var espada_slash_telegraph : float = 0.7
 @export var espada_slash_active    : float = 0.3
 @export var espada_lance_damage    : float = 1_400.0
-@export var espada_lance_speed     : float = 240.0
+@export var espada_lance_speed     : float = 480.0
 @export var espada_lance_count     : int   = 4
 @export var espada_lance_gap       : float = 0.3
 @export var espada_disappear_telegraph : float = 1.3
@@ -120,6 +120,10 @@ extends BossBase
 @export var skin_espada  : PackedScene
 @export var skin_sombra  : PackedScene
 @export var skin_esfera  : PackedScene
+## Fundo da arena na fase "Cavaleiro das Sombras" (opcional). Trocado no pico
+## da transição (tela 100% preta), então a troca é invisível pro player.
+## Desenhe em 960x540, igual ao fundo inicial da arena.
+@export var bg_sombras   : Texture2D
 
 
 # === ESTADO ============================================================
@@ -464,8 +468,11 @@ func _transition_shadows() -> void:
 	dark.color.a = 1.0
 	await _sleep(transicao_hold_time)
 
-	# Troca de cenário "visual": muda o tint do corpo do boss enquanto está preto.
+	# Troca de cenário "visual": muda o tint do corpo do boss e o fundo da
+	# arena (se configurado) enquanto a tela está 100% preta — ninguém vê o corte.
 	_set_body("Corpo", Color(0.35, 0.25, 0.55))
+	if bg_sombras:
+		get_parent().set_background(bg_sombras)
 	_phase_sword = true
 
 	# Reveal

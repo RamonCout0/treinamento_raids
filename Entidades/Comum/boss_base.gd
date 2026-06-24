@@ -28,12 +28,12 @@ extends CharacterBody2D
 
 # --- ARENA ---
 @export_group("Arena")
-@export var arena_left  : float = 16.0
-@export var arena_right : float = 464.0
-@export var arena_top   : float = 16.0
-@export var arena_floor : float = 252.0
+@export var arena_left  : float = 32.0
+@export var arena_right : float = 928.0
+@export var arena_top   : float = 32.0
+@export var arena_floor : float = 504.0
 @export var hover_height : float = 40.0     ## altura em que o boss flutua
-@export var move_speed   : float = 260.0
+@export var move_speed   : float = 520.0
 
 # --- VIDA / STAGGER ---
 @export_group("Vida e Stagger")
@@ -75,7 +75,7 @@ extends CharacterBody2D
 # O boss vaga pelo mapa nas pausas entre ataques (em vez de ficar parado no meio).
 @export_group("Movimentação")
 @export var roam : bool = true            # vaga pelo mapa nas pausas entre ataques
-@export var roam_speed : float = 110.0    # velocidade do deslocamento de roam
+@export var roam_speed : float = 220.0    # velocidade do deslocamento de roam
 @export var roam_x_margin : float = 60.0  # folga das bordas no eixo X
 @export var roam_y_jitter : float = 28.0  # variação de altura ao redor do hover
 

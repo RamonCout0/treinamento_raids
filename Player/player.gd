@@ -15,11 +15,14 @@ extends CharacterBody2D
 # ============================================================================
 
 # --- MOVIMENTO ---
-const SPEED            := 250.0
+# Velocidades horizontais/de travessia escaladas 2x junto com a arena (mapa
+# dobrou de tamanho); JUMP_VELOCITY fica de fora de propósito p/ não alterar
+# o arco do pulo (preserva o alcance das plataformas aéreas da asha/devorador).
+const SPEED            := 500.0
 const JUMP_VELOCITY    := -450.0
-const WALL_CLIMB_SPEED := 160.0
-const WALL_SLIDE_SPEED := 100.0
-const DASH_SPEED       := 850.0
+const WALL_CLIMB_SPEED := 320.0
+const WALL_SLIDE_SPEED := 200.0
+const DASH_SPEED       := 1700.0
 const DASH_TIME        := 0.18
 const DASH_COOLDOWN    := 0.40
 

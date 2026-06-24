@@ -14,9 +14,9 @@ extends BossBase
 @export var th_gate_pct       : float = 0.55
 
 @export_group("Asha: Tempos e velocidade")
-@export var fireball_speed : float = 240.0
-@export var homing_speed   : float = 150.0
-@export var jet_speed      : float = 220.0
+@export var fireball_speed : float = 480.0
+@export var homing_speed   : float = 300.0
+@export var jet_speed      : float = 440.0
 @export var trail_active   : float = 3.0
 @export var lava_telegraph : float = 0.7
 @export var lava_active    : float = 2.5

@@ -120,7 +120,7 @@ func _atk_wisps() -> void:
 	_play_anim("cast")
 	for k in 3:
 		if not _alive(): return
-		_spawn_projectile(PROJECTILE.Mode.HOMING, global_position, Vector2.UP, 160.0,
+		_spawn_projectile(PROJECTILE.Mode.HOMING, global_position, Vector2.UP, 320.0,
 			wisp_damage, true, skin_wisp, Vector2(16, 16), Color(0.7, 0.4, 1.0, 0.9))
 		await _sleep(0.45)
 	await _sleep(0.8)

@@ -105,7 +105,7 @@ func _atk_souls() -> void:
 	_play_anim("attack")
 	for k in 3:
 		if not _alive(): return
-		_spawn_projectile(PROJECTILE.Mode.HOMING, global_position, Vector2.DOWN, 165.0,
+		_spawn_projectile(PROJECTILE.Mode.HOMING, global_position, Vector2.DOWN, 330.0,
 			soul_damage, true, skin_alma, Vector2(18, 18), Color(0.8, 0.2, 0.5, 0.9))
 		await _sleep(0.45)
 	await _sleep(0.8)
@@ -118,7 +118,7 @@ func _atk_claw_fan() -> void:
 		var frac := (float(k) / 4.0) - 0.5
 		var ang := base + deg_to_rad(70.0 * frac)
 		_spawn_projectile(PROJECTILE.Mode.STRAIGHT, global_position, Vector2.RIGHT.rotated(ang),
-			320.0, claw_damage, false, skin_garra, Vector2(14, 6), Color(1.0, 0.5, 0.2))
+			640.0, claw_damage, false, skin_garra, Vector2(14, 6), Color(1.0, 0.5, 0.2))
 	await _sleep(0.6)
 
 
@@ -239,7 +239,7 @@ func _phase_final() -> void:
 		soul_cd -= dt
 		if soul_cd <= 0.0:
 			soul_cd = 1.6
-			_spawn_projectile(PROJECTILE.Mode.HOMING, global_position, Vector2.DOWN, 175.0,
+			_spawn_projectile(PROJECTILE.Mode.HOMING, global_position, Vector2.DOWN, 350.0,
 				soul_damage, true, skin_alma, Vector2(18, 18), Color(0.8, 0.2, 0.5, 0.9))
 		meteor_cd -= dt
 		if meteor_cd <= 0.0:

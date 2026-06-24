@@ -15,7 +15,7 @@ extends BossBase
 @export var wave_damage    : float = 2_000.0
 @export var boulder_damage : float = 1_800.0
 @export var charge_damage  : float = 3_000.0
-@export var charge_speed   : float = 520.0
+@export var charge_speed   : float = 1040.0
 @export var rock_damage    : float = 1_900.0
 @export var pause          : float = 1.6
 
@@ -163,7 +163,7 @@ func _atk_pedras() -> void:
 	for k in count:
 		if not _player_alive(): break
 		var dir := (_player.global_position - global_position).normalized()
-		_spawn_projectile(PROJECTILE.Mode.STRAIGHT, global_position, dir, 300.0,
+		_spawn_projectile(PROJECTILE.Mode.STRAIGHT, global_position, dir, 600.0,
 			boulder_damage, true, skin_pedra, Vector2(22, 22), Color(0.6, 0.55, 0.5))
 		await _sleep(0.45)
 	await _sleep(0.4)
