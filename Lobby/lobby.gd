@@ -9,7 +9,7 @@ const PLAYER : PackedScene = preload("res://Player/player.tscn")
 
 # Definição dos portais: id da raid + cor + posição + nome.
 const PORTALS := [
-	{"id": "silvanna",  "name": "RAID 1  ·  Silvanna",  "color": Color(0.70, 0.75, 0.92), "x": 110.0},
+	{"id": "trunda",    "name": "RAID 1  ·  Trunda",    "color": Color(0.70, 0.75, 0.92), "x": 110.0},
 	{"id": "duelista",  "name": "RAID 2  ·  Kael",      "color": Color(0.62, 0.62, 0.82), "x": 180.0},
 	{"id": "colosso",   "name": "RAID 3  ·  Gorm",      "color": Color(0.58, 0.52, 0.42), "x": 240.0},
 	{"id": "tecela",    "name": "RAID 4  ·  Nyx",       "color": Color(0.62, 0.35, 0.82), "x": 310.0},

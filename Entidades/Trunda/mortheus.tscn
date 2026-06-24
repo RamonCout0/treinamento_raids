@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://raidoboss_mortheus"]
+[ext_resource type="Script" path="res://Entidades/Trunda/mortheus.gd" id="1"]
+[node name="Mortheus" type="CharacterBody2D"]
+script = ExtResource("1")
+boss_name = "Mortheus, O Último"
+epithet = "Sussurra os votos do gelo. O cavaleiro nunca foi um homem."
+portrait_color = Color(0.65, 0.85, 1.0, 1)
+body_size = Vector2(38, 46)
+max_hp = 70000.0
+hp_per_bar = 1000.0
+max_stagger = 5000.0

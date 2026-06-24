@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://raidoboss1silv"]
 
-[ext_resource type="Script" path="res://Entidades/Silvanna/silvanna.gd" id="1"]
+[ext_resource type="Script" path="res://Entidades/Trunda/silvanna.gd" id="1"]
 
 [node name="Silvanna" type="CharacterBody2D"]
 script = ExtResource("1")

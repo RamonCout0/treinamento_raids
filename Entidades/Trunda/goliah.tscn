@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://raidoboss_goliah"]
+[ext_resource type="Script" path="res://Entidades/Trunda/goliah.gd" id="1"]
+[node name="Goliah" type="CharacterBody2D"]
+script = ExtResource("1")
+boss_name = "Goliah, o Guardião"
+epithet = "Esculpido por mãos que nunca foram suas. Pesado, lento, cheio de gelo."
+portrait_color = Color(0.55, 0.7, 0.85, 1)
+body_size = Vector2(54, 64)
+max_hp = 90000.0
+hp_per_bar = 1000.0
+max_stagger = 5500.0

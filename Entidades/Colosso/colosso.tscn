@@ -1,13 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://raidoboss3colo"]
+[gd_scene format=3 uid="uid://cmk0fauaw7aoq"]
 
-[ext_resource type="Script" path="res://Entidades/Colosso/colosso.gd" id="1"]
+[ext_resource type="Script" uid="uid://co3pxe20u11v4" path="res://Entidades/Colosso/colosso.gd" id="1"]
 
-[node name="Colosso" type="CharacterBody2D"]
+[node name="Colosso" type="CharacterBody2D" unique_id=1826181581]
 script = ExtResource("1")
 boss_name = "Gorm, o Colosso de Pedra"
+body_size = Vector2(64, 84)
 epithet = "Aço escorrega. Só a postura quebra a montanha."
 portrait_color = Color(0.58, 0.52, 0.42, 1)
-body_size = Vector2(64, 84)
 hover_height = 42.0
 move_speed = 180.0
 max_hp = 60000.0

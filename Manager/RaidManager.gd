@@ -10,9 +10,9 @@ const LOBBY_SCENE := "res://Lobby/lobby.tscn"
 
 # raid_id -> array de cenas (gate 1, gate 2, boss final).
 var raids : Dictionary = {
-	"silvanna": [
-		"res://Arenas/arena_eira.tscn",
-		"res://Arenas/arena_vex.tscn",
+	"trunda": [
+		"res://Arenas/arena_mortheus.tscn",
+		"res://Arenas/arena_goliah.tscn",
 		"res://Arenas/arena_silvanna.tscn",
 	],
 	"duelista": [
@@ -87,7 +87,7 @@ func play_single(scene_path: String) -> void:
 	get_tree().change_scene_to_file(scene_path)
 
 
-# Texto pra HUD: "Raid Silvanna — 2/3" etc. Vazio fora de raid.
+# Texto pra HUD: "Raid Trunda — Gate 2/3" etc. Vazio fora de raid.
 func progress_text() -> String:
 	if current_raid == "" or not raids.has(current_raid):
 		return ""

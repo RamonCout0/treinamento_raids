@@ -1,13 +1,13 @@
-[gd_scene load_steps=6 format=3 uid="uid://raidoarena_eira"]
+[gd_scene load_steps=6 format=3 uid="uid://raidoarena_mortheus"]
 [ext_resource type="Script" path="res://Arenas/arena.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://raidoplayer001" path="res://Player/player.tscn" id="2"]
-[ext_resource type="PackedScene" uid="uid://raidoboss_eira" path="res://Entidades/Silvanna/eira.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://raidoboss_mortheus" path="res://Entidades/Trunda/mortheus.tscn" id="3"]
 [ext_resource type="PackedScene" uid="uid://raidohudboss01" path="res://UI/boss_hud.tscn" id="4"]
 [ext_resource type="PackedScene" uid="uid://raidohudplayer" path="res://UI/player_hud.tscn" id="5"]
 
-[node name="ArenaEira" type="Node2D"]
+[node name="ArenaMortheus" type="Node2D"]
 script = ExtResource("1")
-arena_tint = Color(0.08, 0.12, 0.18, 1)
+arena_tint = Color(0.10, 0.14, 0.22, 1)
 
 [node name="Player" parent="." instance=ExtResource("2")]
 position = Vector2(60, 240)

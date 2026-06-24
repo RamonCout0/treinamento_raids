@@ -47,6 +47,17 @@ extends CharacterBody2D
 ## Desligue pra voltar ao comportamento antigo (só quebra entre ataques).
 @export var stagger_interrupts_attacks : bool = true
 
+# Sensibilidade da barra: pesada em COMBATE NEUTRO (ataques normais),
+# normal em JANELAS DE MECÂNICA (escudos, gates, parry-counters de mecânica).
+@export_subgroup("Stagger: Sensibilidade")
+## Multiplicador do stagger ganho em COMBATE NEUTRO. <1 = barra mais pesada/lenta.
+@export var stagger_normal_mult : float = 0.45
+## Multiplicador do stagger ganho durante JANELAS DE MECÂNICA. 1.0 = sem nerf.
+@export var stagger_mech_mult : float = 1.0
+## Cooldown (s) após o boss sair do stun. Durante esse tempo ele é IMUNE a novo
+## stagger — impede "jackeio" infinito. Mecânicas/gates IGNORAM esse cooldown.
+@export var stagger_cooldown : float = 8.0
+
 @export_group("Ritmo Global (multiplicadores)")
 @export var hp_mult : float = 5.0                  # escala a VIDA total (botão de duração da luta)
 @export var telegraph_mult : float = 1.0          # escala o aviso (telegrafo)
@@ -80,6 +91,9 @@ var _stun_pending := false
 var _flashing     := false
 var _guard_t      := 0.0     # tempo restante da proteção de mecânica/fase
 var _stagger_immune := false # mecânica imune a stagger: barra não enche nem quebra
+var _stagger_cd_t  := 0.0    # cooldown anti-spam: enquanto > 0, ignora novo stagger
+var _stagger_mech_mode := false # combate neutro vs janela de mecânica (afeta mult)
+var _muzzle : Node2D = null  # origem opcional de projéteis (Marker2D filho "Muzzle")
 
 # --- FORMAS (placeholder cubo trocável por AnimatedSprite2D) ---
 # Adicione filhos AnimatedSprite2D; eles são registrados pelo NOME do nó.
@@ -136,6 +150,9 @@ func _ready() -> void:
 	if _player == null:
 		push_warning("[%s] Player não encontrado no grupo 'player'!" % boss_name)
 
+	# Origem opcional pra projéteis (alinha com o sprite/braço/cajado).
+	_muzzle = get_node_or_null("Muzzle") as Node2D
+
 	current_hp = max_hp
 	# Deferido: garante que as HUDs já conectaram aos sinais antes do valor chegar.
 	EventBus.boss_intro.emit.call_deferred(boss_name)
@@ -156,6 +173,8 @@ func _physics_process(delta: float) -> void:
 		return
 	if _guard_t > 0.0:
 		_guard_t = max(0.0, _guard_t - delta)
+	if _stagger_cd_t > 0.0:
+		_stagger_cd_t = max(0.0, _stagger_cd_t - delta)
 	if state == State.FIGHT and not is_immune and stagger > 0.0:
 		stagger = max(0.0, stagger - stagger_decay * delta)
 		EventBus.boss_stagger_updated.emit(stagger, max_stagger)
@@ -199,12 +218,22 @@ func take_damage(amount: float) -> void:
 			_die()
 
 
-func add_stagger(amount: float) -> void:
+## `is_mechanic = true` para parry-counters de mecânica e gates (usa
+## `stagger_mech_mult` em vez do `stagger_normal_mult`). Em ambos os casos o
+## cooldown anti-spam (após sair do stun) bloqueia tudo até zerar.
+func add_stagger(amount: float, is_mechanic: bool = false) -> void:
 	if state == State.DEAD or state == State.STAGGERED:
 		return
 	if _stagger_immune:
 		return   # mecânica imune: postura não acumula nem quebra
-	stagger = min(max_stagger, stagger + amount)
+	if _stagger_cd_t > 0.0:
+		return   # anti-spam: boss acabou de sair do stun, segura o jackeio
+	var mult : float
+	if is_mechanic or _stagger_mech_mode:
+		mult = stagger_mech_mult
+	else:
+		mult = stagger_normal_mult
+	stagger = min(max_stagger, stagger + amount * mult)
 	EventBus.boss_stagger_updated.emit(stagger, max_stagger)
 	if stagger >= max_stagger and not is_immune and state == State.FIGHT:
 		_stun_pending = true
@@ -218,9 +247,12 @@ func _reset_stagger() -> void:
 # PORTÃO DE STAGGER (à la Silvanna): por `time` s o boss fica imune a HP; encha a
 # barra de stagger pra PASSAR. Falhar = wipe (se fail_wipe). `on_tick` (opcional)
 # roda todo frame com o delta — use pra cuspir perigos/sucção durante o portão.
+# Durante o gate o cooldown anti-spam é zerado e o stagger usa `stagger_mech_mult`.
 func _stagger_gate(time: float, on_tick: Callable = Callable(), fail_wipe := true) -> bool:
 	is_immune = true
 	_reset_stagger()
+	_stagger_cd_t = 0.0
+	_set_stagger_mech_mode(true)
 	var dt := get_physics_process_delta_time()
 	var t := 0.0
 	var ok := false
@@ -233,6 +265,7 @@ func _stagger_gate(time: float, on_tick: Callable = Callable(), fail_wipe := tru
 			break
 		await get_tree().physics_frame
 	_reset_stagger()
+	_set_stagger_mech_mode(false)
 	is_immune = false
 	if not ok and fail_wipe and _alive():
 		_wipe()
@@ -274,6 +307,7 @@ func _do_stun() -> void:
 	if state == State.STAGGERED:
 		state = State.FIGHT
 	_reset_stagger()
+	_stagger_cd_t = stagger_cooldown   # anti-spam: segura o próximo stagger
 	_restore_body_color()
 	_play_anim("idle")
 
@@ -342,6 +376,21 @@ func _sleep(t: float) -> void:
 # (_await_counter) já ligam isso sozinhas; os portões usam `is_immune`.
 func _set_stagger_immune(on: bool) -> void:
 	_stagger_immune = on
+
+
+# Liga/desliga o MODO MECÂNICA: enquanto ligado, qualquer `add_stagger()` é
+# escalado por `stagger_mech_mult` (em vez do `stagger_normal_mult` do combate
+# neutro). Use em escudos especiais, fases desesperadas, etc. NÃO confunda com
+# `_set_stagger_immune` (que desliga a barra inteira).
+func _set_stagger_mech_mode(on: bool) -> void:
+	_stagger_mech_mode = on
+
+
+# Posição de origem dos PROJÉTEIS do boss. Por padrão é a posição global do
+# próprio nó; se houver um Marker2D filho chamado "Muzzle", usa a posição dele
+# (útil pra alinhar com o sprite/braço/cajado). Use em `_spawn_projectile`.
+func _muzzle_pos() -> Vector2:
+	return _muzzle.global_position if _muzzle else global_position
 
 
 func _move_to(target: Vector2, speed: float) -> void:

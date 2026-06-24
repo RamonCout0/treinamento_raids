@@ -142,7 +142,7 @@ func _strike() -> bool:
 	var ok := await _await_counter(_scaled(parry_window))
 	if ok:
 		_parry_feedback()
-		add_stagger(parry_stagger)
+		add_stagger(parry_stagger, true)   # parry-counter = mecânica (ignora nerf neutro)
 		EventBus.boss_stagger_updated.emit(stagger, max_stagger)
 		return true
 	if _player_alive():

@@ -209,7 +209,7 @@ func _atk_duelo() -> void:
 		return _player_alive() and absf(_player.global_position.x - real_x) < 140.0
 	var ok := await _await_counter(duelo_window, valid)
 	if ok:
-		_parry_feedback(); add_stagger(max_stagger * 0.4)
+		_parry_feedback(); add_stagger(max_stagger * 0.4, true)   # mecânica de duelo
 	elif _alive() and _player_alive():
 		_player.take_damage(duelo_damage)
 	cl.queue_free(); cr.queue_free()
@@ -288,20 +288,24 @@ func _atk_gelo_meteoros() -> void:
 
 
 func _atk_facas() -> void:
-	var base := (_player.global_position - global_position).angle() if _player_alive() else 0.0
+	var origin := _muzzle_pos()
+	var base := (_player.global_position - origin).angle() if _player_alive() else 0.0
 	for k in 5:
 		var frac := (float(k) / 4.0) - 0.5
 		var ang := base + deg_to_rad(80.0 * frac)
-		_spawn_projectile(PROJECTILE.Mode.BOUNCE, global_position, Vector2.RIGHT.rotated(ang),
+		_spawn_projectile(PROJECTILE.Mode.BOUNCE, origin, Vector2.RIGHT.rotated(ang),
 			380.0, 800.0, false, skin_faca, Vector2(12, 4), Color(0.9, 0.9, 0.6))
 	await _sleep(0.4)
 
 
 func _atk_dragao() -> void:
+	_play_anim("cast")
 	for h in 2:
-		_spawn_projectile(PROJECTILE.Mode.HOMING,
-			Vector2(randf_range(arena_left + 30.0, arena_right - 30.0), arena_floor - 14.0),
-			Vector2.UP, 180.0, 1500.0, true, skin_dragao, Vector2(28, 20), Color(1.0, 0.4, 0.0, 0.9))
+		if not _alive(): return
+		var origin := _muzzle_pos()
+		var dir : Vector2 = (_player.global_position - origin).normalized() if _player_alive() else Vector2.DOWN
+		_spawn_projectile(PROJECTILE.Mode.HOMING, origin, dir, 180.0, 1500.0,
+			true, skin_dragao, Vector2(28, 20), Color(1.0, 0.4, 0.0, 0.9))
 		await _sleep(0.5)
 	await _sleep(2.0)
 

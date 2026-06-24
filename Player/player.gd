@@ -30,7 +30,7 @@ const BUFFER_TIME := 0.25         # janela de buffer p/ encadear o próximo golp
 # [dano, stagger] por passo de combo
 # OBS: o combo é rápido (encadeia com buffer), então o dano por golpe é baixo
 # de propósito — quem mata é a CONSISTÊNCIA + as janelas de stagger (dano 2x).
-const COMBO_DMG     := [250.0, 350.0, 600.0]
+const COMBO_DMG     := [2500.0, 3580.0, 6800.0]
 const COMBO_STAGGER := [500.0, 650.0, 900.0]
 # Heavy: lento e fraco em dano, mas é o MAIOR gerador de stagger (abre o DPS).
 const HEAVY_DMG     := 700.0

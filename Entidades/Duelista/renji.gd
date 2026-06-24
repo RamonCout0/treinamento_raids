@@ -56,7 +56,7 @@ func _strike() -> bool:
 	var ok := await _await_counter(parry_window)
 	if ok:
 		_parry_feedback()
-		add_stagger(parry_stagger)
+		add_stagger(parry_stagger, true)   # parry-counter = mecânica (ignora nerf neutro)
 		return true
 	if _player_alive(): _player.take_damage(strike_damage)
 	_restore_body_color()
